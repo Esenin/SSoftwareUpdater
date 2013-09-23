@@ -4,7 +4,7 @@ SSoftwareUpdater
 ##Simple updater
 
 ###usage:
-updater --platform <platform-name> --version <version-ID> --link <link-to-file>
+updater --platform [platform-name] --version [version-ID] --link [link-to-file]
 
 	* "platform"
 		windows
@@ -21,29 +21,7 @@ updater --platform <platform-name> --version <version-ID> --link <link-to-file>
 	* "soft"  - will start setup with next run of main program
 
 ###example
-1)
-updater --platform windows --version 032 --link http://127.0.0.1/updates.xml
-2) 
-updater --platform windows --version 032 --link http://127.0.0.1/updates.xml --soft
+ * updater --platform windows --version 032 --link http://127.0.0.1/updates.xml
+ * updater --platform windows --version 032 --link http://127.0.0.1/updates.xml --soft
 
-### XML file example (updates on server side)
-
-<updaterInformation>
-    <versionId>032</versionId>
-    <version>0.3.2</version>
-    <platformFileList>
-        <platformFile>
-            <platform>windows</platform>
-            <url>http://192.168.56.1:8080/Sea_battle0.3_Setup.exe</url>            
-        </platformFile>
-        <platformFile>
-            <platform>linux</platform>
-            <url>http://192.168.56.1:8080/Sea_battle0.3_Setup.rar</url>
-        </platformFile>
-        <platformFile>
-            <platform>osx</platform>
-            <url>http://192.168.56.1:8080/Sea_battle0.3_Setup.rar</url>
-        </platformFile>
-    </platformFileList>
-</updaterInformation>
-
+### [XML file example (updates on server side)] (https://github.com/Esenin/SSoftwareUpdater/blob/master/updates.xml)
