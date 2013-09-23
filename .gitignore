@@ -16,5 +16,4 @@ release/*
 release\*
 debug/*
 debug\*
-
-updates.xml
+softUpdater/updates.xml
