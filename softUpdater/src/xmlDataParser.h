@@ -7,18 +7,19 @@
 
 class XmlDataParser : public DetailsParser
 {
+	Q_OBJECT
 public:
 	class ReadError{};
 
-	XmlDataParser(QString const platform, QIODevice *device);
+	XmlDataParser(QString const platform);
 	virtual ~XmlDataParser();
+	virtual void parseDevice(QIODevice *device);
 
 protected:
 	void readXml() throw(ReadError);
-	void readPlatformFile();
+	void readPlatformFile();   // FIXME
 	void selectLocalDetails();
 
-	QXmlStreamReader *xml;
-
+	QXmlStreamReader *mXml;
 };
 

@@ -1,10 +1,9 @@
 #include "detailsParser.h"
 
-DetailsParser::DetailsParser(QString const platform, QIODevice *device)
+DetailsParser::DetailsParser(QString const platform)
 	: mPlatformName(platform)
 	, mVersionId(0)
 {
-	Q_UNUSED(device);
 }
 
 int DetailsParser::version() const
@@ -21,3 +20,4 @@ QString DetailsParser::filename() const
 {
 	return mFileName;
 }
+

@@ -18,7 +18,7 @@ updater --platform [platform-name] --version [version-ID] --link [link-to-file]
 	* "link"  - link with instructions file in XML or JSON(not ready)
 		you can find file format below
 	
-	* "soft"  - will start setup with next run of main program
+	* "soft"  - will start setup when next time main program started
 
 ###example
  * updater --platform windows --version 032 --link http://127.0.0.1/updates.xml

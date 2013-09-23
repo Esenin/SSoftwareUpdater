@@ -1,48 +1,53 @@
 #include "xmlDataParser.h"
 
-XmlDataParser::XmlDataParser(const QString platform, QIODevice *device)
-	: DetailsParser(platform, device)
+XmlDataParser::XmlDataParser(const QString platform)
+	: DetailsParser(platform)
+	, mXml(NULL)
 {
-	xml = new QXmlStreamReader(device);
-	readXml();
-	selectLocalDetails();
 }
 
 XmlDataParser::~XmlDataParser()
 {
-	delete xml;
+	delete mXml;
+}
+
+void XmlDataParser::parseDevice(QIODevice *device)
+{
+	mXml = new QXmlStreamReader(device);
+	readXml();
+	selectLocalDetails();
 }
 
 void XmlDataParser::readXml() throw(ReadError)
 {
-	if (!xml->readNextStartElement() || xml->name() != "updaterInformation") {
+	if (!mXml->readNextStartElement() || mXml->name() != "updaterInformation") {
 		throw (ReadError());
 	}
 
-	while (xml->readNextStartElement()) {
-		if (xml->name() == "versionId") {
-			mVersionId = xml->readElementText().toInt();
-		} else if (xml->name() == "platformFileList") {
-			xml->readNextStartElement();
+	while (mXml->readNextStartElement()) {
+		if (mXml->name() == "versionId") {
+			mVersionId = mXml->readElementText().toInt();
+		} else if (mXml->name() == "platformFileList") {
+			mXml->readNextStartElement();
 			readPlatformFile();
 		} else {
-			xml->skipCurrentElement();
+			mXml->skipCurrentElement();
 		}
 	}
 }
 
 void XmlDataParser::readPlatformFile()
 {
-	Q_ASSERT(xml.isStartElement() && xml.name() == "platformFile");
+	Q_ASSERT(mXml->isStartElement() && mXml->name() == "platformFile");
 
 	QString curPlatform;
-	while (xml.readNextStartElement()) {
-		if (xml.name() == "platform") {
-			curPlatform = xml->readElementText();
-		} else if (xml->name() == "url") {
-			mFiles.insert(curPlatform, xml->readElementText());
+	while (mXml->readNextStartElement()) {
+		if (mXml->name() == "platform") {
+			curPlatform = mXml->readElementText();
+		} else if (mXml->name() == "url") {
+			mFiles.insert(curPlatform, mXml->readElementText());
 		} else {
-			xml.skipCurrentElement();
+			mXml->skipCurrentElement();
 		}
 	}
 }
