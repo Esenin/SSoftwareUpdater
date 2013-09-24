@@ -3,3 +3,8 @@
 Updater::Updater()
 {
 }
+
+Updater::~Updater()
+{
+
+}

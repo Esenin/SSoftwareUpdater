@@ -18,7 +18,7 @@ public:
 
 	//! \brief version
 	//! \return new version id
-	int version() const;
+	QString version() const;
 
 	//! \brief downloadAdress
 	//! \return url of setup file
@@ -30,7 +30,7 @@ public slots:
 
 protected:
 	QString const mPlatformName;
-	int mVersionId;
+	QString mVersionId;
 	QUrl mDownloadUrl;
 	QString mFileName;
 	//! platform <-> url

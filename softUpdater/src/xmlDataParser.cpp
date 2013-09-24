@@ -25,12 +25,11 @@ void XmlDataParser::readXml() throw(ReadError)
 	}
 
 	while (mXml->readNextStartElement()) {
-		if (mXml->name() == "versionId") {
-			mVersionId = mXml->readElementText().toInt();
-		} else if (mXml->name() == "platformFileList") {
-			mXml->readNextStartElement();
+		if (mXml->name() == "version") {
+			mVersionId = mXml->readElementText();
+		} else if (mXml->name() == "platformFile") {
 			readPlatformFile();
-		} else {
+		} else if (mXml->name() != "platformFileList") {
 			mXml->skipCurrentElement();
 		}
 	}

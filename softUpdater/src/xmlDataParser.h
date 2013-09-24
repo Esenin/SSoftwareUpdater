@@ -17,7 +17,7 @@ public:
 
 protected:
 	void readXml() throw(ReadError);
-	void readPlatformFile();   // FIXME
+	void readPlatformFile();
 	void selectLocalDetails();
 
 	QXmlStreamReader *mXml;

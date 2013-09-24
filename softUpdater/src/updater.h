@@ -1,11 +1,22 @@
 #pragma once
 
-#include <QCoreApplication>
+#include <QtCore/QCoreApplication>
 
-class Updater
+#include "downloader.h"
+#include "xmlDataParser.h"
+
+class Updater : public QObject
 {
+	Q_OBJECT
 public:
 	Updater();
+	~Updater();
+
+protected:
+
+
+	Downloader *mDownloader;
+	DetailsParser *mParser;
 
 };
 

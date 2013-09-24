@@ -2,11 +2,10 @@
 
 DetailsParser::DetailsParser(QString const platform)
 	: mPlatformName(platform)
-	, mVersionId(0)
 {
 }
 
-int DetailsParser::version() const
+QString DetailsParser::version() const
 {
 	return mVersionId;
 }
