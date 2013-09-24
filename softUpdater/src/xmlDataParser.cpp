@@ -16,6 +16,8 @@ void XmlDataParser::parseDevice(QIODevice *device)
 	mXml = new QXmlStreamReader(device);
 	readXml();
 	selectLocalDetails();
+	device->deleteLater();
+	emit parseFinished();
 }
 
 void XmlDataParser::readXml() throw(ReadError)
@@ -39,21 +41,27 @@ void XmlDataParser::readunitFile()
 {
 	Q_ASSERT(mXml->isStartElement() && mXml->name() == "unitFile");
 
-	QString curunit;
+	QString curModule;
+	QUrl curUrl;
+	QString argument;
 	while (mXml->readNextStartElement()) {
 		if (mXml->name() == "unit") {
-			curunit = mXml->readElementText();
+			curModule = mXml->readElementText();
 		} else if (mXml->name() == "url") {
-			mFiles.insert(curunit, mXml->readElementText());
+			curUrl = QUrl(mXml->readElementText());
+		} else if (mXml->name() == "paramStr") {
+			argument = mXml->readElementText();
 		} else {
 			mXml->skipCurrentElement();
 		}
 	}
+	mFiles.insert(curModule, curUrl);
+	mParamStrings.insert(curModule, argument);
 }
 
 void XmlDataParser::selectLocalDetails()
 {
-	mDownloadUrl = mFiles.value(munitName);
+	mDownloadUrl = mFiles.value(mUnitName);
 	QFileInfo fileInfo(mDownloadUrl.toString());
 	mFileName = fileInfo.fileName();
 }

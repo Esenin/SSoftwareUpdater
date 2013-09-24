@@ -1,17 +1,20 @@
 <updaterInformation>
     <version>0.3.2</version>
-    <platformFileList>
-        <platformFile>
-            <platform>windows</platform>
-            <url>http://127.0.0.1/Sea_battle0.3_Setup.exe</url>            
-        </platformFile>
-        <platformFile>
-            <platform>linux</platform>
+    <unitFileList>
+        <unitFile>
+            <unit>windows</unit>
+            <url>http://127.0.0.1/Sea_battle0.3_Setup.exe</url>     
+            <paramStr>/s</paramStr>
+        </unitFile>
+        <unitFile>
+            <unit>linux</unit>
             <url>http://127.0.0.1/Sea_battle0.3_Setup.run</url>
-        </platformFile>
-        <platformFile>
-            <platform>osx</platform>
+            <paramStr>/s</paramStr>
+        </unitFile>
+        <unitFile>
+            <unit>osx</unit>
             <url>http://127.0.0.1/Sea_battle0.3_Setup.rar</url>
-        </platformFile>
-    </platformFileList>
+            <paramStr>/s</paramStr>
+        </unitFile>
+    </unitFileList>
 </updaterInformation>

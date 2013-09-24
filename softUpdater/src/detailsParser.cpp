@@ -1,7 +1,7 @@
 #include "detailsParser.h"
 
 DetailsParser::DetailsParser(QString const unit)
-	: munitName(unit)
+	: mUnitName(unit)
 {
 }
 
@@ -12,7 +12,12 @@ QString DetailsParser::version() const
 
 QUrl DetailsParser::downloadAdress() const
 {
-	return mDownloadUrl;
+	return mFiles.value(mUnitName);
+}
+
+QStringList DetailsParser::arguments() const
+{
+	return mParamStrings.value(mUnitName).split(" ");
 }
 
 QString DetailsParser::filename() const

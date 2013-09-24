@@ -6,16 +6,16 @@ SSoftwareUpdater
 ###usage:
 updater -unit [unit-name] -version [version] -url [url-to-file]
 
-	"unit"
+	"-unit"
 		windows
 		linux
 		osx
-		etc.. whatever yours
+		etc.. name of platfornm, modules or somethings yours
 	
-	"version"  - version  e.g. 2.4.0a
+	"-version"  - version  e.g. 2.4.0a
 		new version must be lexicographical greater than old to start updating
 	
-	"url"  - url with instructions file in XML or JSON(not ready)
+	"-url"  - url with instructions file in XML or JSON(not ready)
 		you can find file format below
 	
 	"-soft"  - download file, but run setup only when next time main program started

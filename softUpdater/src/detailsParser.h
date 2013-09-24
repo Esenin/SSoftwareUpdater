@@ -1,8 +1,7 @@
 #pragma once
 
-#include <QtCore/QObject>
 #include <QtCore/QIODevice>
-#include <QtCore/QString>
+#include <QtCore/QStringList>
 #include <QtCore/QUrl>
 #include <QtCore/QMap>
 
@@ -23,17 +22,22 @@ public:
 	//! \brief downloadAdress
 	//! \return url of setup file
 	QUrl downloadAdress() const;
+	QStringList arguments() const;
 	QString filename() const;
+
+signals:
+	void parseFinished();
 
 public slots:
 	virtual void parseDevice(QIODevice *device) = 0;
 
 protected:
-	QString const munitName;
+	QString const mUnitName;
 	QString mVersionId;
 	QUrl mDownloadUrl;
 	QString mFileName;
 	//! unit <-> url
 	QMap<QString, QUrl> mFiles;
+	QMap<QString, QString> mParamStrings;
 };
 

@@ -4,7 +4,6 @@
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QSslError>
 #include <QtCore/QFileInfo>
-#include <QDebug>
 
 class QSslError;
 
@@ -22,6 +21,8 @@ public:
 signals:
 	void detailsDownloaded(QIODevice *reply);
 	void updatesDownloaded(QString filePath);
+	void detailsLoadError(QString error);
+	void updatesLoadError(QString error);
 
 protected:
 	void sendRequest(QUrl const url);

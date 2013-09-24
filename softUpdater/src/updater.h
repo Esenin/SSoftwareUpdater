@@ -1,9 +1,9 @@
 #pragma once
 
 #include <QtCore/QCoreApplication>
+#include <QtCore/QProcess>
 #include <QtCore/QStringList>
 #include <QtCore/QTimer>
-#include <QDebug>
 
 #include "downloader.h"
 #include "xmlDataParser.h"
@@ -24,12 +24,17 @@ protected:
 	//! \return True if new version is newer than current
 	bool hasNewUpdates(QString const newVersion);
 
-
 	static int const criticalParamsCount = 3;
 	bool mSoftUpdate;
+	QProcess *mUpdater;
 	QMap<QString, QString> mParams;
 	Downloader *mDownloader;
 	DetailsParser *mParser;
+
+protected slots:
+	void detailsChanged();
+	void fileReady(QString const filePath);
+	void updateFinished(int exitCode, QProcess::ExitStatus status);
 
 };
 
