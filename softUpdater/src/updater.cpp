@@ -7,14 +7,28 @@ Updater::Updater()
 	parseParams();
 	mDownloader = new Downloader(this);
 	mParser = new XmlDataParser(mParams.value("-unit"));
-	connect(mDownloader, SIGNAL(updatesDownloaded(QString)), this, SLOT(fileReady(QString)));
-	connect(mDownloader, SIGNAL(detailsDownloaded(QIODevice*)), mParser, SLOT(parseDevice(QIODevice*)));
-	connect(mParser, SIGNAL(parseFinished()), this, SLOT(detailsChanged()));
-	mDownloader->getUpdateDetails(mParams.value("-url"));
+	initConnections();
+
+	startUpdatingProcess();
 }
 
 Updater::~Updater()
 {
+	delete mParser;
+}
+
+void Updater::startUpdatingProcess()
+{
+	mDownloader->getUpdateDetails(mParams.value("-url"));
+}
+
+void Updater::initConnections()
+{
+	connect(mDownloader, SIGNAL(detailsLoadError(QString)), this, SLOT(downloadErrors(QString)));
+	connect(mDownloader, SIGNAL(updatesLoadError(QString)), this, SLOT(downloadErrors(QString)));
+	connect(mDownloader, SIGNAL(updatesDownloaded(QString)), this, SLOT(fileReady(QString)));
+	connect(mDownloader, SIGNAL(detailsDownloaded(QIODevice*)), mParser, SLOT(parseDevice(QIODevice*)));
+	connect(mParser, SIGNAL(parseFinished()), this, SLOT(detailsChanged()));
 }
 
 bool Updater::parseParams()
@@ -45,8 +59,9 @@ bool Updater::hasNewUpdates(QString const newVersion)
 
 void Updater::detailsChanged()
 {
-	if (!hasNewUpdates(mParser->version()))
-		return;
+	if (!hasNewUpdates(mParser->version())) {
+		QCoreApplication::quit();
+	}
 
 	mDownloader->getUpdate(mParser->downloadAdress());
 }
@@ -61,9 +76,14 @@ void Updater::fileReady(QString const filePath)
 
 void Updater::updateFinished(int exitCode, QProcess::ExitStatus status)
 {
-	qDebug() << exitCode;
 	if (status == QProcess::NormalExit)
 		QCoreApplication::quit();
 	Q_UNUSED(exitCode);
+}
+
+void Updater::downloadErrors(QString error)
+{
+	QCoreApplication::quit();
+	Q_UNUSED(error);
 }
 

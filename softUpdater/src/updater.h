@@ -15,7 +15,11 @@ public:
 	Updater();
 	~Updater();
 
+public slots:
+	void startUpdatingProcess();
+
 protected:
+	void initConnections();
 	//! \brief parseParams
 	//! \return True if arguments are correct, false otherwise
 	bool parseParams();
@@ -35,6 +39,7 @@ protected slots:
 	void detailsChanged();
 	void fileReady(QString const filePath);
 	void updateFinished(int exitCode, QProcess::ExitStatus status);
+	void downloadErrors(QString error);
 
 };
 

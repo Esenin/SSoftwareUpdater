@@ -4,6 +4,7 @@
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QSslError>
 #include <QtCore/QFileInfo>
+#include <QDebug>
 
 class QSslError;
 

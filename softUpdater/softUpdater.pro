@@ -13,16 +13,15 @@ TEMPLATE = app
 
 
 SOURCES += src/main.cpp\
-	src/MainWindow.cpp \
     src/detailsParser.cpp \
     src/xmlDataParser.cpp \
     src/updater.cpp \
     src/downloader.cpp
 
-HEADERS  += src/MainWindow.h \
+HEADERS  += \
     src/detailsParser.h \
     src/xmlDataParser.h \
     src/updater.h \
     src/downloader.h
 
-FORMS    += src/MainWindow.ui
+FORMS    +=
