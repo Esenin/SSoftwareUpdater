@@ -16,8 +16,8 @@ class Downloader : public QObject
 	Q_OBJECT
 public:
 	explicit Downloader(QObject *parent = 0);
-	void getUpdateDetails(QUrl const link);
-	void getUpdate(QUrl const link);
+	void getUpdateDetails(QUrl const url);
+	void getUpdate(QUrl const url);
 
 signals:
 	void detailsDownloaded(QIODevice *reply);

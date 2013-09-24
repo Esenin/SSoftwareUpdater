@@ -6,16 +6,16 @@ Downloader::Downloader(QObject *parent)
 {
 }
 
-void Downloader::getUpdateDetails(QUrl const link)
+void Downloader::getUpdateDetails(QUrl const url)
 {
 	connect(&mManager, SIGNAL(finished(QNetworkReply*)), SLOT(detailsFileDownloaded(QNetworkReply*)));
-	sendRequest(link);
+	sendRequest(url);
 	connect(mReply, SIGNAL(sslErrors(QList<QSslError>)), SLOT(sslErrors(QList<QSslError>)));
 }
 
-void Downloader::getUpdate(QUrl const link)
+void Downloader::getUpdate(QUrl const url)
 {
-	QFileInfo fileInfo(link.path());
+	QFileInfo fileInfo(url.path());
 	QString fileName = fileInfo.fileName();
 	if (fileName.isEmpty())
 		fileName = "update";
@@ -32,7 +32,7 @@ void Downloader::getUpdate(QUrl const link)
 		return;
 	}
 
-	startFileDownloading(link);
+	startFileDownloading(url);
 }
 
 void Downloader::detailsFileDownloaded(QNetworkReply *reply)

@@ -1,7 +1,7 @@
 #include "detailsParser.h"
 
-DetailsParser::DetailsParser(QString const platform)
-	: mPlatformName(platform)
+DetailsParser::DetailsParser(QString const unit)
+	: munitName(unit)
 {
 }
 
