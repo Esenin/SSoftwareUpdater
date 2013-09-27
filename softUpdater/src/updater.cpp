@@ -1,13 +1,17 @@
 #include "updater.h"
 
 Updater::Updater()
-	: mSoftUpdate(false)
+	: mCurAttempt(0)
+	, mHardUpdate(false)
+	, mUpdatesFolder("ForwardUpdates/")
 	, mUpdater(NULL)
 {
 	parseParams();
 	mDownloader = new Downloader(this);
 	mParser = new XmlDataParser(mParams.value("-unit"));
 	initConnections();
+
+	findPreparedUpdates();
 
 	startUpdatingProcess();
 }
@@ -19,11 +23,16 @@ Updater::~Updater()
 
 void Updater::startUpdatingProcess()
 {
+	if (mRetryTimer.isActive()) {
+		mRetryTimer.stop();
+	}
+	mCurAttempt++;
 	mDownloader->getUpdateDetails(mParams.value("-url"));
 }
 
 void Updater::initConnections()
 {
+	connect(&mRetryTimer, SIGNAL(timeout()), this, SLOT(startUpdatingProcess()));
 	connect(mDownloader, SIGNAL(detailsLoadError(QString)), this, SLOT(downloadErrors(QString)));
 	connect(mDownloader, SIGNAL(updatesLoadError(QString)), this, SLOT(downloadErrors(QString)));
 	connect(mDownloader, SIGNAL(updatesDownloaded(QString)), this, SLOT(fileReady(QString)));
@@ -38,7 +47,7 @@ bool Updater::parseParams()
 		return false;
 	}
 
-	mSoftUpdate = QCoreApplication::arguments().contains("-soft", Qt::CaseInsensitive);
+	mHardUpdate = QCoreApplication::arguments().contains("-hard", Qt::CaseInsensitive);
 	QStringList params;
 	params << "-unit" << "-version" << "-url";
 	foreach (QString param, params) {
@@ -57,6 +66,39 @@ bool Updater::hasNewUpdates(QString const newVersion)
 	return newVersion > mParams.value("-version");
 }
 
+void Updater::startSetupProgram(QString const filePath)
+{
+	mUpdater = new QProcess(this);
+	connect(mUpdater, SIGNAL(finished(int, QProcess::ExitStatus))
+	, this, SLOT(updateFinished(int, QProcess::ExitStatus)));
+	mUpdater->start(filePath, mParser->arguments());
+}
+
+void Updater::saveFileForLater(QString const filePath)
+{
+	QDir().mkdir(mUpdatesFolder);
+
+	if (QFile::exists(mUpdatesFolder + QFileInfo(filePath).fileName())) {
+		QFile::remove(mUpdatesFolder + QFileInfo(filePath).fileName());
+	}
+
+	QFile::rename(filePath, mUpdatesFolder + QFileInfo(filePath).fileName());
+	QCoreApplication::quit();
+}
+
+void Updater::findPreparedUpdates()
+{
+	QDir updatesDir(mUpdatesFolder);
+	if (!updatesDir.exists()) {
+		return;
+	}
+
+	QStringList files = updatesDir.entryList(QDir::Files);
+	foreach (QString const filePath, files) {
+		startSetupProgram(mUpdatesFolder + filePath);
+	}
+}
+
 void Updater::detailsChanged()
 {
 	if (!hasNewUpdates(mParser->version())) {
@@ -68,22 +110,31 @@ void Updater::detailsChanged()
 
 void Updater::fileReady(QString const filePath)
 {
-	mUpdater = new QProcess(this);
-	mUpdater->start(filePath, mParser->arguments());
-	connect(mUpdater, SIGNAL(finished(int, QProcess::ExitStatus))
-			, this, SLOT(updateFinished(int,QProcess::ExitStatus)));
+	if (mHardUpdate) {
+		startSetupProgram(filePath);
+		return;
+	}
+
+	saveFileForLater(filePath);
 }
 
 void Updater::updateFinished(int exitCode, QProcess::ExitStatus status)
 {
-	if (status == QProcess::NormalExit)
+	if (status == QProcess::NormalExit) {
 		QCoreApplication::quit();
+
+	}
 	Q_UNUSED(exitCode);
 }
 
 void Updater::downloadErrors(QString error)
 {
-	QCoreApplication::quit();
+	if (mCurAttempt < maxAttemptsCount) {
+		mRetryTimer.start(retryTimerout);
+	} else {
+		QCoreApplication::quit();
+	}
+
 	Q_UNUSED(error);
 }
 

@@ -16,12 +16,14 @@ SOURCES += src/main.cpp\
     src/detailsParser.cpp \
     src/xmlDataParser.cpp \
     src/updater.cpp \
-    src/downloader.cpp
+    src/downloader.cpp \
+    src/communicator.cpp
 
 HEADERS  += \
     src/detailsParser.h \
     src/xmlDataParser.h \
     src/updater.h \
-    src/downloader.h
+    src/downloader.h \
+    src/communicator.h
 
 FORMS    +=
