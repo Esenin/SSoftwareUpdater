@@ -1,7 +1,7 @@
 #include "xmlDataParser.h"
 
-XmlDataParser::XmlDataParser(const QString unit)
-	: DetailsParser(unit)
+XmlDataParser::XmlDataParser()
+	: DetailsParser()
 	, mXml(NULL)
 {
 }
@@ -15,7 +15,7 @@ void XmlDataParser::parseDevice(QIODevice *device)
 {
 	mXml = new QXmlStreamReader(device);
 	readXml();
-	selectLocalDetails();
+	setUnitName(mFileUrls.keys().first());
 	device->deleteLater();
 	emit parseFinished();
 }
@@ -27,41 +27,37 @@ void XmlDataParser::readXml() throw(ReadError)
 	}
 
 	while (mXml->readNextStartElement()) {
-		if (mXml->name() == "version") {
-			mVersionId = mXml->readElementText();
-		} else if (mXml->name() == "unitFile") {
-			readunitFile();
+		if (mXml->name() == "unitFile") {
+			readUnitFile();
 		} else if (mXml->name() != "unitFileList") {
 			mXml->skipCurrentElement();
 		}
 	}
 }
 
-void XmlDataParser::readunitFile()
+void XmlDataParser::readUnitFile()
 {
 	Q_ASSERT(mXml->isStartElement() && mXml->name() == "unitFile");
 
 	QString curModule;
-	QUrl curUrl;
+	QUrl fileUrl;
 	QString argument;
+	QString version;
 	while (mXml->readNextStartElement()) {
 		if (mXml->name() == "unit") {
 			curModule = mXml->readElementText();
 		} else if (mXml->name() == "url") {
-			curUrl = QUrl(mXml->readElementText());
+			fileUrl = QUrl(mXml->readElementText());
+		} else if (mXml->name() == "version") {
+			version = mXml->readElementText();
 		} else if (mXml->name() == "paramStr") {
 			argument = mXml->readElementText();
 		} else {
 			mXml->skipCurrentElement();
 		}
 	}
-	mFileUrls.insert(curModule, curUrl);
+	mFileUrls.insert(curModule, fileUrl);
 	mParamStrings.insert(curModule, argument);
+	mVersions.insert(curModule, version);
 }
 
-void XmlDataParser::selectLocalDetails()
-{
-	mDownloadUrl = mFileUrls.value(mCurrentUnit);
-	QFileInfo fileInfo(mDownloadUrl.toString());
-	mFileName = fileInfo.fileName();
-}

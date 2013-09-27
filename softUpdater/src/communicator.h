@@ -10,10 +10,5 @@ public:
 	explicit Communicator(QObject *parent = 0);
 
 	void writeQuitMessage();
-
-signals:
-
-public slots:
-
 };
 

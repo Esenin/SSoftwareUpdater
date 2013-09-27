@@ -11,14 +11,13 @@ class XmlDataParser : public DetailsParser
 public:
 	class ReadError{};
 
-	XmlDataParser(QString const unit);
+	XmlDataParser();
 	virtual ~XmlDataParser();
 	virtual void parseDevice(QIODevice *device);
 
 protected:
 	void readXml() throw(ReadError);
-	void readunitFile();
-	void selectLocalDetails();
+	void readUnitFile();
 
 	QXmlStreamReader *mXml;
 };
