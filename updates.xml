@@ -1,20 +1,22 @@
 <updaterInformation>
-    <version>0.3.2</version>
     <unitFileList>
         <unitFile>
             <unit>windows</unit>
             <url>http://127.0.0.1/Sea_battle0.3_Setup.exe</url>     
             <paramStr>/s</paramStr>
+            <version>0.3.2</version>
         </unitFile>
         <unitFile>
             <unit>linux</unit>
             <url>http://127.0.0.1/Sea_battle0.3_Setup.run</url>
             <paramStr>/s</paramStr>
+            <version>0.3.2</version>
         </unitFile>
         <unitFile>
             <unit>osx</unit>
             <url>http://127.0.0.1/Sea_battle0.3_Setup.rar</url>
-            <paramStr>/s</paramStr>
+            <paramStr></paramStr>
+            <version>0.3.2</version>
         </unitFile>
     </unitFileList>
 </updaterInformation>
