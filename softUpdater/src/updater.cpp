@@ -4,6 +4,7 @@ Updater::Updater()
 	: mCurAttempt(0)
 	, mHardUpdate(false)
 	, mUpdatesFolder("ForwardUpdates/")
+	, mParamFile("updateArgs.dat")
 	, mUpdater(NULL)
 {
 	parseParams();
@@ -66,12 +67,12 @@ bool Updater::hasNewUpdates(QString const newVersion)
 	return newVersion > mParams.value("-version");
 }
 
-void Updater::startSetupProgram(QString const filePath)
+void Updater::startSetupProgram(QString const filePath, QStringList const arguments)
 {
 	mUpdater = new QProcess(this);
 	connect(mUpdater, SIGNAL(finished(int, QProcess::ExitStatus))
 	, this, SLOT(updateFinished(int, QProcess::ExitStatus)));
-	mUpdater->start(filePath, mParser->arguments());
+	mUpdater->start(filePath, arguments);
 }
 
 void Updater::saveFileForLater(QString const filePath)
@@ -83,6 +84,13 @@ void Updater::saveFileForLater(QString const filePath)
 	}
 
 	QFile::rename(filePath, mUpdatesFolder + QFileInfo(filePath).fileName());
+
+	QFile argsFile(mUpdatesFolder + mParamFile);
+	argsFile.open(QIODevice::WriteOnly | QIODevice::Text);
+	foreach (QString const argument, mParser->arguments()) {
+		argsFile.write(QString(argument + " ").toLocal8Bit());
+	}
+	argsFile.close();
 	QCoreApplication::quit();
 }
 
@@ -99,6 +107,25 @@ void Updater::findPreparedUpdates()
 	}
 }
 
+void Updater::saveUpdateInfo()
+{
+
+}
+
+QStringList Updater::loadUpdateInfo()
+{
+	QSettings updateInfo(mUpdatesFolder + "update.ini", QSettings::IniFormat, this);
+	QString fileName = updateInfo.value("file").toString();
+	QStringList result;
+	int size = updateInfo.beginReadArray("args");
+	for (int i = 0; i < size(); i++) {
+		updateInfo.setArrayIndex(i);
+		result << updateInfo.value(fileName).toString();
+	}
+	updateInfo.endArray();
+	return result;
+}
+
 void Updater::detailsChanged()
 {
 	if (!hasNewUpdates(mParser->version())) {
@@ -111,7 +138,7 @@ void Updater::detailsChanged()
 void Updater::fileReady(QString const filePath)
 {
 	if (mHardUpdate) {
-		startSetupProgram(filePath);
+		startSetupProgram(filePath, mParser->arguments());
 		return;
 	}
 

@@ -55,13 +55,13 @@ void XmlDataParser::readunitFile()
 			mXml->skipCurrentElement();
 		}
 	}
-	mFiles.insert(curModule, curUrl);
+	mFileUrls.insert(curModule, curUrl);
 	mParamStrings.insert(curModule, argument);
 }
 
 void XmlDataParser::selectLocalDetails()
 {
-	mDownloadUrl = mFiles.value(mUnitName);
+	mDownloadUrl = mFileUrls.value(mCurrentUnit);
 	QFileInfo fileInfo(mDownloadUrl.toString());
 	mFileName = fileInfo.fileName();
 }

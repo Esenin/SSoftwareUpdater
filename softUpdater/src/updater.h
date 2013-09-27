@@ -1,8 +1,9 @@
 #pragma once
 
 #include <QtCore/QCoreApplication>
-#include <QtCore/QProcess>
 #include <QtCore/QStringList>
+#include <QtCore/QSettings>
+#include <QtCore/QProcess>
 #include <QtCore/QTimer>
 #include <QtCore/QDir>
 #include <QDebug>
@@ -29,9 +30,11 @@ protected:
 	//! \param newVersion
 	//! \return True if new version is newer than current
 	bool hasNewUpdates(QString const newVersion);
-	void startSetupProgram(QString const filePath);
+	void startSetupProgram(QString const filePath, QStringList const arguments);
 	void saveFileForLater(QString const filePath);
 	void findPreparedUpdates();
+	void saveUpdateInfo();
+	QStringList loadUpdateInfo();
 
 	static int const criticalParamsCount = 3;
 	static int const retryTimerout = 10 * 60 * 1000;
@@ -39,6 +42,7 @@ protected:
 	int mCurAttempt;
 	bool mHardUpdate;
 	QString mUpdatesFolder;
+	QString mParamFile;
 	QTimer mRetryTimer;
 	QProcess *mUpdater;
 	QMap<QString, QString> mParams;

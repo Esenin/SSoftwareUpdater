@@ -2,6 +2,7 @@
 
 #include <QtCore/QIODevice>
 #include <QtCore/QStringList>
+#include <QtCore/QFileInfo>
 #include <QtCore/QUrl>
 #include <QtCore/QMap>
 
@@ -12,8 +13,10 @@ class DetailsParser : public QObject
 {
 	Q_OBJECT
 public:
-	DetailsParser(QString const unit);
+	DetailsParser(){}
 	virtual ~DetailsParser(){}
+
+	virtual setUnitName(QString const currentUnit);
 
 	//! \brief version
 	//! \return new version id
@@ -24,6 +27,7 @@ public:
 	QUrl downloadAdress() const;
 	QStringList arguments() const;
 	QString filename() const;
+	QStringList units() const;
 
 signals:
 	void parseFinished();
@@ -32,12 +36,14 @@ public slots:
 	virtual void parseDevice(QIODevice *device) = 0;
 
 protected:
-	QString const mUnitName;
+	QString mCurrentUnit;
 	QString mVersionId;
 	QUrl mDownloadUrl;
 	QString mFileName;
+	QStringList mArguments;
 	//! unit <-> url
-	QMap<QString, QUrl> mFiles;
+	QMap<QString, QUrl> mFileUrls;
 	QMap<QString, QString> mParamStrings;
+	QMap<QString, QString> mVersions;
 };
 
