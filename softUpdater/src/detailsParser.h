@@ -16,6 +16,8 @@ public:
 	DetailsParser(){}
 	virtual ~DetailsParser(){}
 
+	//! \brief setUnitName  checkout other module
+	//! \param currentUnit other module name
 	virtual setUnitName(QString const currentUnit);
 
 	//! \brief version
