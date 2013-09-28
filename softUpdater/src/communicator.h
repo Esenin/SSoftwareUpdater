@@ -9,6 +9,6 @@ class Communicator : public QObject
 public:
 	explicit Communicator(QObject *parent = 0);
 
-	void writeQuitMessage();
+	static void writeQuitMessage();
 };
 

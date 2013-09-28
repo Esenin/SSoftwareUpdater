@@ -1,26 +1,47 @@
 #include "updateManager.h"
 
-UpdateManager::UpdateManager(QObject *parent)
+UpdateManager::UpdateManager(QString updatesFolder, QObject *parent)
 	: QObject(parent)
-	, settingsFile("updateInfo.dat")
+	, settingsFile("updateInfo.ini")
 {
 	mUpdateInfo = new QSettings(settingsFile, QSettings::IniFormat, parent);
 }
 
 UpdateManager::~UpdateManager()
 {
-	delete mUpdateInfo;
+	mUpdateInfo->sync();
 }
 
 void UpdateManager::saveFromParser(DetailsParser const *parser)
 {
-	updateInfo.setValue("fileName", parser->filename());
-	updateInfo.setValue("version", parser->version());
-	QStringList curArguments = parser->arguments();
-	updateInfo.beginWriteArray("args", curArguments.size());
-	for (int i = 0; i < curArguments.size(); i++) {
-		updateInfo.setArrayIndex(i);
-		updateInfo.setValue(parser->filename(), curArguments.at(i));
-	}
-	updateInfo.endArray();
+	mUpdateInfo->beginGroup(parser->currentUnit());
+	mUpdateInfo->setValue("fileName", parser->filename());
+	mUpdateInfo->setValue("version", parser->version());
+	mUpdateInfo->setValue("args", parser->arguments());
+	mUpdateInfo->endGroup();
+}
+
+void UpdateManager::loadUpdateInfo(QString const unit)
+{
+	mCurrentUnit = unit;
+	mUpdateInfo->beginGroup(mCurrentUnit);
+	mFileName = mUpdateInfo->value("fileName").toString();
+	mVersion = mUpdateInfo->value("version").toString();
+	mArguments = mUpdateInfo->value("args").toStringList();
+	mUpdateInfo->endGroup();
+}
+
+QString UpdateManager::version() const
+{
+	return mVersion;
+}
+
+QString UpdateManager::fileName() const
+{
+	return mFileName;
+}
+
+QStringList UpdateManager::arguments() const
+{
+	return mArguments;
 }

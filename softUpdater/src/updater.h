@@ -10,6 +10,8 @@
 
 #include "downloader.h"
 #include "xmlDataParser.h"
+#include "updateManager.h"
+#include "communicator.h"
 
 class Updater : public QObject
 {
@@ -32,9 +34,7 @@ protected:
 	bool hasNewUpdates(QString const newVersion);
 	void startSetupProgram(QString const filePath, QStringList const arguments);
 	void saveFileForLater(QString const filePath);
-	void findPreparedUpdates();
-	void saveUpdateInfo();
-	QStringList loadUpdateInfo();
+	void checkPreparedUpdates();
 
 	static int const criticalParamsCount = 3;
 	static int const retryTimerout = 10 * 60 * 1000;
@@ -42,12 +42,12 @@ protected:
 	int mCurAttempt;
 	bool mHardUpdate;
 	QString mUpdatesFolder;
-	QString mParamFile;
 	QTimer mRetryTimer;
-	QProcess *mUpdater;
+	QProcess *mUpdateProcess;
 	QMap<QString, QString> mParams;
 	Downloader *mDownloader;
 	DetailsParser *mParser;
+	UpdateManager *mUpdateInfo;
 
 protected slots:
 	void detailsChanged();

@@ -18,7 +18,7 @@ public:
 
 	//! \brief setUnitName  checkout other module
 	//! \param currentUnit other module name
-	virtual setUnitName(QString const currentUnit);
+	virtual void setUnitName(QString const currentUnit);
 
 	//! \brief version
 	//! \return new version id
@@ -30,6 +30,7 @@ public:
 	QStringList arguments() const;
 	QString filename() const;
 	QStringList units() const;
+	QString currentUnit() const;
 
 signals:
 	void parseFinished();

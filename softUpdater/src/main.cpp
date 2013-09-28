@@ -1,3 +1,7 @@
+/*
+ * QRealSpecial branch: application was made for only setup-file usage
+ */
+
 #include <QApplication>
 
 #include "updater.h"

@@ -1,6 +1,6 @@
 #include "detailsParser.h"
 
-DetailsParser::setUnitName(QString const currentUnit)
+void DetailsParser::setUnitName(QString const currentUnit)
 {
 	mCurrentUnit = currentUnit;
 	mDownloadUrl = mFileUrls.value(mCurrentUnit);
@@ -33,5 +33,10 @@ QString DetailsParser::filename() const
 QStringList DetailsParser::units() const
 {
 	return mFileUrls.keys();
+}
+
+QString DetailsParser::currentUnit() const
+{
+	return mCurrentUnit;
 }
 
