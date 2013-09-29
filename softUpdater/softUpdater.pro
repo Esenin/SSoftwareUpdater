@@ -18,7 +18,8 @@ SOURCES += src/main.cpp\
     src/updater.cpp \
     src/downloader.cpp \
     src/communicator.cpp \
-    src/updateManager.cpp
+    src/updateManager.cpp \
+    src/update.cpp
 
 HEADERS  += \
     src/detailsParser.h \
@@ -26,6 +27,6 @@ HEADERS  += \
     src/updater.h \
     src/downloader.h \
     src/communicator.h \
-    src/updateManager.h
+    src/updateManager.h \
+    src/update.h
 
-FORMS    +=

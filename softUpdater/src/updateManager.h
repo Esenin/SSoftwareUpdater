@@ -2,6 +2,7 @@
 
 #include <QtCore/QSettings>
 #include <QtCore/QObject>
+#include <QtCore/QDir>
 
 #include "detailsParser.h"
 
@@ -11,7 +12,8 @@ class UpdateManager : public QObject
 public:
 	UpdateManager(QString updatesFolder, QObject *parent);
 	~UpdateManager();
-	void saveFromParser(DetailsParser const *parser);
+
+	void saveFileForLater(DetailsParser const *parser, QString const filePath);
 	void loadUpdateInfo(QString const unit);
 
 	QString version() const;
@@ -19,6 +21,9 @@ public:
 	QStringList arguments() const;
 
 protected:
+	void saveInfoFromParser(DetailsParser const *parser);
+
+	QString const mUpdatesFolder;
 	QString const settingsFile;
 	QSettings *mUpdateInfo;
 	QString mCurrentUnit;

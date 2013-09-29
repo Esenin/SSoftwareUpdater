@@ -81,21 +81,6 @@ void Updater::startSetupProgram(QString const filePath, QStringList const argume
 	mUpdateProcess->start(filePath, arguments);
 }
 
-void Updater::saveFileForLater(QString const filePath)
-{
-	QDir().mkdir(mUpdatesFolder);
-
-	if (QFile::exists(mUpdatesFolder + QFileInfo(filePath).fileName())) {
-		QFile::remove(mUpdatesFolder + QFileInfo(filePath).fileName());
-	}
-
-	QFile::rename(filePath, mUpdatesFolder + QFileInfo(filePath).fileName());
-
-	mParser->setUnitName(mParams.value("-unit"));
-	mUpdateInfo->saveFromParser(mParser);
-	qDebug() << "File saved for later usage: " << QFileInfo(filePath).fileName();
-}
-
 void Updater::checkPreparedUpdates()
 {
 	QDir updatesDir(mUpdatesFolder);
@@ -131,7 +116,8 @@ void Updater::fileReady(QString const filePath)
 		return;
 	}
 
-	saveFileForLater(filePath);
+	mParser->setUnitName(mParams.value("-unit"));
+	mUpdateInfo->saveFileForLater(mParser, filePath);
 	QCoreApplication::quit();
 }
 

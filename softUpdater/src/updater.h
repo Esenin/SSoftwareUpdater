@@ -33,7 +33,6 @@ protected:
 	//! \return True if new version is newer than current
 	bool hasNewUpdates(QString const newVersion);
 	void startSetupProgram(QString const filePath, QStringList const arguments);
-	void saveFileForLater(QString const filePath);
 	void checkPreparedUpdates();
 
 	static int const criticalParamsCount = 3;

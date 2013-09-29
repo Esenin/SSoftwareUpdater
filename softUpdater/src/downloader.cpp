@@ -40,9 +40,9 @@ void Downloader::detailsFileDownloaded(QNetworkReply *reply)
 	if (reply->error()) {
 		emit detailsLoadError(qPrintable(reply->errorString()));
 		qDebug() << "details download failed:" << qPrintable(reply->errorString());
+	} else {
+		emit detailsDownloaded(reply);
 	}
-
-	emit detailsDownloaded(reply);
 }
 
 void Downloader::updatesFileDownloaded(QNetworkReply *reply)
@@ -54,21 +54,12 @@ void Downloader::updatesFileDownloaded(QNetworkReply *reply)
 	} else {
 		mFile->flush();
 		mFile->close();
+		emit updatesDownloaded(QFileInfo(*mFile).filePath());
 	}
 
 	mReply->deleteLater();
 	mReply = 0;
-	emit updatesDownloaded(QFileInfo(*mFile).filePath());
 	delete mFile;
-	mReply = 0;
-}
-
-void Downloader::sslErrors(QList<QSslError> const &errors)
-{
-#ifndef QT_NO_OPENSSL
-	foreach (const QSslError &error, errors)
-		qDebug() << "SSL error:" << qPrintable(error.errorString());
-#endif
 }
 
 void Downloader::fileReadyRead()
