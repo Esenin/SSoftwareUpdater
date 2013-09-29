@@ -17,7 +17,7 @@ UpdateManager::~UpdateManager()
 void UpdateManager::saveInfoFromParser(DetailsParser const *parser)
 {
 	mUpdateInfo->beginGroup(parser->currentUnit());
-	mUpdateInfo->setValue("filePath", parser->currentUpdate()->filePath());
+	mUpdateInfo->setValue("fileName", parser->currentUpdate()->filePath());
 	mUpdateInfo->setValue("version", parser->currentUpdate()->version());
 	mUpdateInfo->setValue("args", parser->currentUpdate()->arguments());
 	mUpdateInfo->endGroup();
@@ -36,6 +36,12 @@ void UpdateManager::saveFileForLater(DetailsParser const *parser, QString const 
 	saveInfoFromParser(parser);
 }
 
+void UpdateManager::removePreparedUpdate()
+{
+	mUpdateInfo->remove(mPreparedUpdate->unit());
+	mPreparedUpdate->clear();
+}
+
 bool UpdateManager::hasPreparedUpdates()
 {
 	return QDir(mUpdatesFolder).exists() && QFile::exists(settingsFile);
@@ -49,7 +55,7 @@ void UpdateManager::loadUpdateInfo(QString const unit)
 
 	mUpdateInfo->beginGroup(unit);
 	mPreparedUpdate->setData(
-			mUpdateInfo->value("filePath").toString()
+			mUpdatesFolder + mUpdateInfo->value("fileName").toString()
 			, mUpdateInfo->value("args").toStringList()
 			, mUpdateInfo->value("version").toString()
 	);

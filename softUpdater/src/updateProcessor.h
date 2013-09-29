@@ -32,10 +32,10 @@ protected:
 	//! \param newVersion
 	//! \return True if new version is newer than current
 	bool hasNewUpdates(QString const newVersion);
-	void startSetupProgram(Update *update);
+	void startSetupProcess(Update *update);
 	void checkoutPreparedUpdates();
 
-	static int const retryTimerout = 10 * 60 * 1000;
+	static int const retryTimerout = 1 * 60 * 1000;
 	static int const maxAttemptsCount = 3;
 	int mCurAttempt;
 	bool mHardUpdate;

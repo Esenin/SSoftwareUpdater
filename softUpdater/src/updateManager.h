@@ -14,6 +14,7 @@ public:
 	~UpdateManager();
 
 	void saveFileForLater(DetailsParser const *parser, QString const filePath);
+	void removePreparedUpdate();
 
 	bool hasPreparedUpdates();
 	void loadUpdateInfo(QString const unit);

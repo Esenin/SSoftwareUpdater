@@ -2,12 +2,14 @@
 
 Update::Update(QObject *parent)
 	: QObject(parent)
+	, mIsInstalled(false)
 	, mProcess(NULL)
 {
 }
 
 Update::Update(QString const filePath, QStringList const args, QString const version, QObject *parent)
 	: QObject(parent)
+	, mIsInstalled(false)
 	, mProcess(NULL)
 {
 	setData(filePath, args, version);
@@ -29,10 +31,14 @@ void Update::setData(const QString filePath, const QStringList args, const QStri
 	mArguments = args;
 	mVersion = version;
 	mDownloadUrl = link;
+	mIsInstalled = false;
 }
 
 void Update::clear()
 {
+	if (QFile::exists(mFilePath)) {
+		QFile::remove(mFilePath);
+	}
 	setData(QString(), QStringList(), QString());
 	setUnitName("");
 	if (isInstalling()) {
@@ -40,6 +46,7 @@ void Update::clear()
 	}
 	mProcess->deleteLater();
 	mProcess = NULL;
+	mIsInstalled = false;
 }
 
 void Update::installUpdate()
@@ -57,7 +64,12 @@ bool Update::isEmpty() const
 
 bool Update::isInstalling() const
 {
-	return (mProcess != NULL) && (mProcess->pid() > 0);
+	return (mProcess != NULL) && (mProcess->state() != QProcess::NotRunning);
+}
+
+bool Update::isInstalled() const
+{
+	return mIsInstalled;
 }
 
 QUrl Update::url() const
@@ -92,6 +104,7 @@ QStringList Update::arguments() const
 
 void Update::installingFinished(int exitCode, QProcess::ExitStatus status)
 {
+	mIsInstalled = true;
 	emit installFinished(status == QProcess::NormalExit);
 	Q_UNUSED(exitCode);
 }

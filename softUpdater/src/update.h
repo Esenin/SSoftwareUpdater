@@ -21,6 +21,7 @@ public:
 
 	bool isEmpty() const;
 	bool isInstalling() const;
+	bool isInstalled() const;
 	QUrl url() const;
 	QString unit() const;
 	QString filePath() const;
@@ -33,6 +34,7 @@ signals:
 	void installFinished(bool);
 
 protected:
+	bool mIsInstalled;
 	QString mFilePath;
 	QStringList mArguments;
 	QString mVersion;

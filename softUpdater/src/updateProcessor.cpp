@@ -76,8 +76,9 @@ bool UpdateProcessor::hasNewUpdates(QString const newVersion)
 	return newVersion > mParams.value("-version");
 }
 
-void UpdateProcessor::startSetupProgram(Update *update)
+void UpdateProcessor::startSetupProcess(Update *update)
 {
+	Communicator::writeQuitMessage();
 	qDebug() << "start setup: " << update->filePath();
 	connect(update, SIGNAL(installFinished(bool)), this, SLOT(updateFinished(bool)));
 	update->installUpdate();
@@ -96,9 +97,8 @@ void UpdateProcessor::checkoutPreparedUpdates()
 		return;
 	}
 
-	Communicator::writeQuitMessage();
 	qDebug() << "starting setup process";
-	startSetupProgram(mUpdateInfo->preparedUpdate());
+	startSetupProcess(mUpdateInfo->preparedUpdate());
 }
 
 void UpdateProcessor::detailsChanged()
@@ -107,6 +107,7 @@ void UpdateProcessor::detailsChanged()
 	if (!hasNewUpdates(mParser->currentUpdate()->version())) {
 		qDebug() << "Server has no new updates";
 		QCoreApplication::quit();
+		return; // quit cannot stop it sometimes...
 	}
 
 	qDebug() << "start downloading update";
@@ -117,7 +118,7 @@ void UpdateProcessor::fileReady(QString const filePath)
 {
 	if (mHardUpdate) {
 		qDebug() << "stating hard update process";
-		startSetupProgram(mParser->currentUpdate());
+		startSetupProcess(mParser->currentUpdate());
 		return;
 	}
 
@@ -129,10 +130,17 @@ void UpdateProcessor::fileReady(QString const filePath)
 
 void UpdateProcessor::updateFinished(bool hasSuccess)
 {
-	qDebug() << "setup execution finished. Success:" + hasSuccess;
+	qDebug() << "setup execution finished. Success:" << hasSuccess;
 	if (hasSuccess) {
-		QFile::remove(mUpdateInfo->preparedUpdate()->filePath());
-		mParams.insert("-version", mUpdateInfo->preparedUpdate()->version());
+		if (mUpdateInfo->preparedUpdate()->isInstalled()) {
+			mParams.insert("-version", mUpdateInfo->preparedUpdate()->version());
+			mUpdateInfo->removePreparedUpdate();
+		} else {
+			mParams.insert("-version", mParser->currentUpdate()->version());
+			mParser->currentUpdate()->clear();
+		}
+	} else {
+		qDebug() << "setup has installed INCORRECT";
 	}
 }
 
