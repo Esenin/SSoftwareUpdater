@@ -1,33 +1,27 @@
 #include "detailsParser.h"
 
-void DetailsParser::setUnitName(QString const currentUnit)
+DetailsParser::DetailsParser()
 {
-	mCurrentUnit = currentUnit;
-	mDownloadUrl = mFileUrls.value(mCurrentUnit);
-	mFileName = QFileInfo(mDownloadUrl.toString()).fileName();
-	mVersionId = mVersions.value(mCurrentUnit);
-	mArguments.clear();
-	mArguments = mParamStrings.value(mCurrentUnit).split(" ");
+	mCurrentUpdate = new Update(this);
 }
 
-QString DetailsParser::version() const
+void DetailsParser::changeUnit(QString const unit)
 {
-	return mVersionId;
+	if (mCurrentUpdate->unit() == unit) {
+		return;
+	}
+	mCurrentUpdate->setUnitName(unit);
+	mCurrentUpdate->setData(
+			QFileInfo(mFileUrls.value(unit).toString()).fileName()
+			, mParamStrings.value(unit).split(" ")
+			, mVersions.value(unit)
+			, mFileUrls.value(unit)
+	);
 }
 
-QUrl DetailsParser::downloadAdress() const
+Update *DetailsParser::currentUpdate() const
 {
-	return mDownloadUrl;
-}
-
-QStringList DetailsParser::arguments() const
-{
-	return mArguments;
-}
-
-QString DetailsParser::filename() const
-{
-	return mFileName;
+	return mCurrentUpdate;
 }
 
 QStringList DetailsParser::units() const
@@ -37,6 +31,6 @@ QStringList DetailsParser::units() const
 
 QString DetailsParser::currentUnit() const
 {
-	return mCurrentUnit;
+	return mCurrentUpdate->unit();
 }
 

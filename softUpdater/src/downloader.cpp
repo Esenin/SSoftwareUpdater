@@ -8,15 +8,13 @@ Downloader::Downloader(QObject *parent)
 
 void Downloader::getUpdateDetails(QUrl const url)
 {
-	connect(&mManager, SIGNAL(finished(QNetworkReply*)), SLOT(detailsFileDownloaded(QNetworkReply*)));
+	connect(&mManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(detailsFileDownloaded(QNetworkReply*)));
 	sendRequest(url);
-	connect(mReply, SIGNAL(sslErrors(QList<QSslError>)), SLOT(sslErrors(QList<QSslError>)));
 }
 
-void Downloader::getUpdate(QUrl const url)
+void Downloader::getUpdate(QUrl const url) throw(CreateFileException)
 {
-	QFileInfo fileInfo(url.path());
-	QString fileName = fileInfo.fileName();
+	QString fileName = QFileInfo(url.path()).fileName();
 	if (fileName.isEmpty())
 		fileName = "update";
 
@@ -29,7 +27,7 @@ void Downloader::getUpdate(QUrl const url)
 		delete mFile;
 		mFile = NULL;
 		qDebug() << "unable to save file:" << fileName << mFile->errorString();
-		return;
+		throw CreateFileException();
 	}
 
 	startFileDownloading(url);
@@ -80,6 +78,5 @@ void Downloader::startFileDownloading(const QUrl url)
 	disconnect(&mManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(detailsFileDownloaded(QNetworkReply*)));
 	connect(&mManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(updatesFileDownloaded(QNetworkReply*)));
 	sendRequest(url);
-	connect(mReply, SIGNAL(sslErrors(QList<QSslError>)), this, SLOT(sslErrors(QList<QSslError>)));
 	connect(mReply, SIGNAL(readyRead()), this, SLOT(fileReadyRead()));
 }

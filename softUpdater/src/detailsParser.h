@@ -3,8 +3,9 @@
 #include <QtCore/QIODevice>
 #include <QtCore/QStringList>
 #include <QtCore/QFileInfo>
-#include <QtCore/QUrl>
 #include <QtCore/QMap>
+
+#include "update.h"
 
 //!
 //! \brief The DetailsParser class
@@ -13,22 +14,15 @@ class DetailsParser : public QObject
 {
 	Q_OBJECT
 public:
-	DetailsParser(){}
+	DetailsParser();
 	virtual ~DetailsParser(){}
 
 	//! \brief setUnitName  checkout other module
 	//! \param currentUnit other module name
-	virtual void setUnitName(QString const currentUnit);
+	virtual void changeUnit(QString const unit);
 
-	//! \brief version
-	//! \return new version id
-	QString version() const;
+	Update* currentUpdate() const;
 
-	//! \brief downloadAdress
-	//! \return url of setup file
-	QUrl downloadAdress() const;
-	QStringList arguments() const;
-	QString filename() const;
 	QStringList units() const;
 	QString currentUnit() const;
 
@@ -39,11 +33,7 @@ public slots:
 	virtual void parseDevice(QIODevice *device) = 0;
 
 protected:
-	QString mCurrentUnit;
-	QString mVersionId;
-	QUrl mDownloadUrl;
-	QString mFileName;
-	QStringList mArguments;
+	Update *mCurrentUpdate;
 	//! unit <-> url
 	QMap<QString, QUrl> mFileUrls;
 	QMap<QString, QString> mParamStrings;

@@ -14,21 +14,18 @@ public:
 	~UpdateManager();
 
 	void saveFileForLater(DetailsParser const *parser, QString const filePath);
+
+	bool hasPreparedUpdates();
 	void loadUpdateInfo(QString const unit);
 
-	QString version() const;
-	QString fileName() const;
-	QStringList arguments() const;
+	Update* preparedUpdate();
 
 protected:
 	void saveInfoFromParser(DetailsParser const *parser);
 
+	Update *mPreparedUpdate;
 	QString const mUpdatesFolder;
 	QString const settingsFile;
 	QSettings *mUpdateInfo;
-	QString mCurrentUnit;
-	QString mVersion;
-	QString mFileName;
-	QStringList mArguments;
 };
 

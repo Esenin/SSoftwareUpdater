@@ -1,5 +1,6 @@
+#pragma once
 
-#include <QtCore/QObject>
+#include <QtCore/QUrl>
 #include <QtCore/QProcess>
 #include <QtCore/QFileInfo>
 #include <QtCore/QStringList>
@@ -10,8 +11,18 @@ class Update : public QObject
 public:
 	explicit Update(QObject *parent = 0);
 	Update(QString const filePath, QStringList const args, QString const version, QObject *parent = 0);
+
+	void setUrl(QUrl const link);
+	void setUnitName(QString const unit);
+	void setData(QString const filePath, QStringList const args, QString const version, QUrl const link = QUrl());
+	void clear();
+
 	void installUpdate();
 
+	bool isEmpty() const;
+	bool isInstalling() const;
+	QUrl url() const;
+	QString unit() const;
 	QString filePath() const;
 	QString fileName() const;
 	QString version() const;
@@ -25,6 +36,11 @@ protected:
 	QString mFilePath;
 	QStringList mArguments;
 	QString mVersion;
+	QString mModule;
+	QUrl mDownloadUrl;
 	QProcess *mProcess;
+
+protected slots:
+	void installingFinished(int exitCode, QProcess::ExitStatus status);
 };
 

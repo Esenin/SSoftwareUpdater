@@ -3,8 +3,9 @@
 UpdateManager::UpdateManager(QString updatesFolder, QObject *parent)
 	: QObject(parent)
 	, mUpdatesFolder(updatesFolder)
-	, settingsFile("updateInfo.ini")
+	, settingsFile(updatesFolder + "updateInfo.ini")
 {
+	mPreparedUpdate = new Update(this);
 	mUpdateInfo = new QSettings(settingsFile, QSettings::IniFormat, parent);
 }
 
@@ -16,9 +17,9 @@ UpdateManager::~UpdateManager()
 void UpdateManager::saveInfoFromParser(DetailsParser const *parser)
 {
 	mUpdateInfo->beginGroup(parser->currentUnit());
-	mUpdateInfo->setValue("fileName", parser->filename());
-	mUpdateInfo->setValue("version", parser->version());
-	mUpdateInfo->setValue("args", parser->arguments());
+	mUpdateInfo->setValue("filePath", parser->currentUpdate()->filePath());
+	mUpdateInfo->setValue("version", parser->currentUpdate()->version());
+	mUpdateInfo->setValue("args", parser->currentUpdate()->arguments());
 	mUpdateInfo->endGroup();
 }
 
@@ -35,27 +36,29 @@ void UpdateManager::saveFileForLater(DetailsParser const *parser, QString const 
 	saveInfoFromParser(parser);
 }
 
+bool UpdateManager::hasPreparedUpdates()
+{
+	return QDir(mUpdatesFolder).exists() && QFile::exists(settingsFile);
+}
+
 void UpdateManager::loadUpdateInfo(QString const unit)
 {
-	mCurrentUnit = unit;
-	mUpdateInfo->beginGroup(mCurrentUnit);
-	mFileName = mUpdateInfo->value("fileName").toString();
-	mVersion = mUpdateInfo->value("version").toString();
-	mArguments = mUpdateInfo->value("args").toStringList();
+	if (!hasPreparedUpdates()) {
+		return;
+	}
+
+	mUpdateInfo->beginGroup(unit);
+	mPreparedUpdate->setData(
+			mUpdateInfo->value("filePath").toString()
+			, mUpdateInfo->value("args").toStringList()
+			, mUpdateInfo->value("version").toString()
+	);
+	mPreparedUpdate->setUnitName(unit);
 	mUpdateInfo->endGroup();
 }
 
-QString UpdateManager::version() const
+Update *UpdateManager::preparedUpdate()
 {
-	return mVersion;
+	return mPreparedUpdate;
 }
 
-QString UpdateManager::fileName() const
-{
-	return mFileName;
-}
-
-QStringList UpdateManager::arguments() const
-{
-	return mArguments;
-}

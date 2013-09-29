@@ -2,22 +2,18 @@
 
 #include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QNetworkReply>
-#include <QtNetwork/QSslError>
 #include <QtCore/QFileInfo>
 #include <QDebug>
-
-class QSslError;
-
-QT_USE_NAMESPACE
-
 
 class Downloader : public QObject
 {
 	Q_OBJECT
 public:
+	class CreateFileException{};
+
 	explicit Downloader(QObject *parent = 0);
 	void getUpdateDetails(QUrl const url);
-	void getUpdate(QUrl const url);
+	void getUpdate(QUrl const url) throw(CreateFileException);
 
 signals:
 	void detailsDownloaded(QIODevice *reply);
@@ -36,7 +32,6 @@ protected:
 protected slots:
 	void detailsFileDownloaded(QNetworkReply *reply);
 	void updatesFileDownloaded(QNetworkReply *reply);
-	void sslErrors(QList<QSslError> const &errors);
 	void fileReadyRead();
 };
 

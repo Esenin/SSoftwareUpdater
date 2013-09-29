@@ -15,7 +15,7 @@ void XmlDataParser::parseDevice(QIODevice *device)
 {
 	mXml = new QXmlStreamReader(device);
 	readXml();
-	setUnitName(mFileUrls.keys().first());
+	changeUnit(mFileUrls.keys().first());
 	device->deleteLater();
 	emit parseFinished();
 }

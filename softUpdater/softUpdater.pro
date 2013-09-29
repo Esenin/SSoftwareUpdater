@@ -15,18 +15,18 @@ TEMPLATE = app
 SOURCES += src/main.cpp\
     src/detailsParser.cpp \
     src/xmlDataParser.cpp \
-    src/updater.cpp \
     src/downloader.cpp \
     src/communicator.cpp \
     src/updateManager.cpp \
-    src/update.cpp
+    src/update.cpp \
+    src/updateProcessor.cpp
 
 HEADERS  += \
     src/detailsParser.h \
     src/xmlDataParser.h \
-    src/updater.h \
     src/downloader.h \
     src/communicator.h \
     src/updateManager.h \
-    src/update.h
+    src/update.h \
+    src/updateProcessor.h
 
