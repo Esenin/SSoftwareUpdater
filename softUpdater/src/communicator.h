@@ -10,5 +10,6 @@ public:
 	explicit Communicator(QObject *parent = 0);
 
 	static void writeQuitMessage();
+	static void writeHelpMessage();
 };
 

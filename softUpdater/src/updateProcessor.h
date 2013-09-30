@@ -35,7 +35,7 @@ protected:
 	void startSetupProcess(Update *update);
 	void checkoutPreparedUpdates();
 
-	static int const retryTimerout = 1 * 60 * 1000;
+	static int const retryTimerout = 1 * 15 * 1000; //                 ! ////////////////
 	static int const maxAttemptsCount = 3;
 	int mCurAttempt;
 	bool mHardUpdate;
@@ -50,6 +50,6 @@ protected slots:
 	void detailsChanged();
 	void fileReady(QString const filePath);
 	void updateFinished(bool hasSuccess);
-	void downloadErrors(QString error);
+	void downloadErrors(QString error = QString());
 };
 

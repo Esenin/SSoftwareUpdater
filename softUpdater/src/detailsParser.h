@@ -21,6 +21,8 @@ public:
 	//! \param currentUnit other module name
 	virtual void changeUnit(QString const unit);
 
+	virtual bool hasErrors() const = 0;
+
 	Update* currentUpdate() const;
 
 	QStringList units() const;

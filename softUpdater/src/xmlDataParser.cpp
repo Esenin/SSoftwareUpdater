@@ -3,21 +3,35 @@
 XmlDataParser::XmlDataParser()
 	: DetailsParser()
 	, mXml(NULL)
+	, mHasInvalidFile(false)
 {
 }
 
 XmlDataParser::~XmlDataParser()
 {
-	delete mXml;
+	if (mXml != NULL) {
+		delete mXml;
+	}
 }
 
 void XmlDataParser::parseDevice(QIODevice *device)
 {
+	mHasInvalidFile = false;
 	mXml = new QXmlStreamReader(device);
-	readXml();
+	try {
+		readXml();
+	} catch(ReadError &) {
+		mHasInvalidFile = true;
+	}
+
 	changeUnit(mFileUrls.keys().first());
 	device->deleteLater();
 	emit parseFinished();
+}
+
+bool XmlDataParser::hasErrors() const
+{
+	return mHasInvalidFile;
 }
 
 void XmlDataParser::readXml() throw(ReadError)

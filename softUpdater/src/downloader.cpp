@@ -35,6 +35,7 @@ void Downloader::getUpdate(QUrl const url) throw(CreateFileException)
 
 void Downloader::detailsFileDownloaded(QNetworkReply *reply)
 {
+	disconnect(&mManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(detailsFileDownloaded(QNetworkReply*)));
 	if (reply->error()) {
 		emit detailsLoadError(qPrintable(reply->errorString()));
 		qDebug() << "details download failed:" << qPrintable(reply->errorString());
@@ -45,6 +46,7 @@ void Downloader::detailsFileDownloaded(QNetworkReply *reply)
 
 void Downloader::updatesFileDownloaded(QNetworkReply *reply)
 {
+	disconnect(&mManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(updatesFileDownloaded(QNetworkReply*)));
 	if (mReply->error()) {
 		emit updatesLoadError(qPrintable(reply->errorString()));
 		qDebug() << "updates download failed:" << qPrintable(reply->errorString());
@@ -75,7 +77,6 @@ void Downloader::sendRequest(QUrl const url)
 
 void Downloader::startFileDownloading(const QUrl url)
 {
-	disconnect(&mManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(detailsFileDownloaded(QNetworkReply*)));
 	connect(&mManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(updatesFileDownloaded(QNetworkReply*)));
 	sendRequest(url);
 	connect(mReply, SIGNAL(readyRead()), this, SLOT(fileReadyRead()));

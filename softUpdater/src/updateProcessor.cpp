@@ -103,6 +103,11 @@ void UpdateProcessor::checkoutPreparedUpdates()
 
 void UpdateProcessor::detailsChanged()
 {
+	if (mParser->hasErrors()) {
+		downloadErrors();
+		return;
+	}
+
 	mParser->changeUnit(mParams.value("-unit"));
 	if (!hasNewUpdates(mParser->currentUpdate()->version())) {
 		qDebug() << "Server has no new updates";

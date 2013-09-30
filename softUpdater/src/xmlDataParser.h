@@ -14,11 +14,13 @@ public:
 	XmlDataParser();
 	virtual ~XmlDataParser();
 	virtual void parseDevice(QIODevice *device);
+	virtual bool hasErrors() const;
 
 protected:
 	void readXml() throw(ReadError);
 	void readUnitFile();
 
 	QXmlStreamReader *mXml;
+	bool mHasInvalidFile;
 };
 
