@@ -3,6 +3,8 @@
 #include <QtCore/QCoreApplication>
 #include <QtCore/QStringList>
 #include <QtCore/QSettings>
+#include <QtCore/QFileInfo>
+#include <QtCore/QProcess>
 #include <QtCore/QTimer>
 #include <QDebug>
 
@@ -34,6 +36,7 @@ protected:
 	bool hasNewUpdates(QString const newVersion);
 	void startSetupProcess(Update *update);
 	void checkoutPreparedUpdates();
+	void restartMainApplication();
 
 	static int const retryTimerout = 1 * 15 * 1000; //                 ! ////////////////
 	static int const maxAttemptsCount = 3;
@@ -42,6 +45,7 @@ protected:
 	QString mUpdatesFolder;
 	QTimer mRetryTimer;
 	QMap<QString, QString> mParams;
+	Communicator *mCommunicator;
 	Downloader *mDownloader;
 	DetailsParser *mParser;
 	UpdateManager *mUpdateInfo;
@@ -51,5 +55,6 @@ protected slots:
 	void fileReady(QString const filePath);
 	void updateFinished(bool hasSuccess);
 	void downloadErrors(QString error = QString());
+	void jobDoneQuit();
 };
 

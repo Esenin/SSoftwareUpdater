@@ -4,9 +4,11 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network
+QT       += core network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+
+CONFIG += console
 
 TARGET = softUpdater
 TEMPLATE = app

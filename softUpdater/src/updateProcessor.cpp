@@ -5,10 +5,14 @@ UpdateProcessor::UpdateProcessor()
 	, mHardUpdate(false)
 	, mUpdatesFolder("ForwardUpdates/")
 {
-	parseParams();
+	mCommunicator = new Communicator(this);
 	mDownloader = new Downloader(this);
 	mParser = new XmlDataParser();
 	mUpdateInfo = new UpdateManager(mUpdatesFolder, this);
+	if (!parseParams()) {
+		mCommunicator->writeHelpMessage();
+	}
+
 	initConnections();
 }
 
@@ -19,13 +23,14 @@ UpdateProcessor::~UpdateProcessor()
 
 void UpdateProcessor::startUpdateControl()
 {
+	mCommunicator->readProgramPath();
+
 	qDebug() << "checking prepared updates";
 	checkoutPreparedUpdates();
 
 	if (!mUpdateInfo->preparedUpdate()->isInstalling()) {
+		mCommunicator->writeResumeMessage();
 		startUpdatingProcess();
-	} else {
-		mRetryTimer.start(retryTimerout);
 	}
 }
 
@@ -78,7 +83,7 @@ bool UpdateProcessor::hasNewUpdates(QString const newVersion)
 
 void UpdateProcessor::startSetupProcess(Update *update)
 {
-	Communicator::writeQuitMessage();
+	mCommunicator->writeQuitMessage();
 	qDebug() << "start setup: " << update->filePath();
 	connect(update, SIGNAL(installFinished(bool)), this, SLOT(updateFinished(bool)));
 	update->installUpdate();
@@ -86,19 +91,29 @@ void UpdateProcessor::startSetupProcess(Update *update)
 
 void UpdateProcessor::checkoutPreparedUpdates()
 {
-	if (!mUpdateInfo->hasPreparedUpdates()) {
+	if (!mUpdateInfo->hasPreparedUpdatesInfo()) {
 		qDebug() << "no prepared updates there";
 		return;
 	}
 
 	mUpdateInfo->loadUpdateInfo(mParams.value("-unit"));
-	if (!hasNewUpdates(mUpdateInfo->preparedUpdate()->version())) {
+	if (!hasNewUpdates(mUpdateInfo->preparedUpdate()->version()) || mUpdateInfo->preparedUpdate()->isEmpty()) {
 		qDebug() << "update is outdated";
 		return;
 	}
 
 	qDebug() << "starting setup process";
 	startSetupProcess(mUpdateInfo->preparedUpdate());
+}
+
+void UpdateProcessor::restartMainApplication()
+{
+	QString const filePath = mCommunicator->parentAppPath();
+	QString const startPath = QFileInfo(filePath).path();
+	QProcess *mainApplication = new QProcess();
+	connect(mainApplication, SIGNAL(started()), this, SLOT(jobDoneQuit()));
+	mainApplication->setWorkingDirectory(startPath);
+	mainApplication->start(filePath);
 }
 
 void UpdateProcessor::detailsChanged()
@@ -111,8 +126,7 @@ void UpdateProcessor::detailsChanged()
 	mParser->changeUnit(mParams.value("-unit"));
 	if (!hasNewUpdates(mParser->currentUpdate()->version())) {
 		qDebug() << "Server has no new updates";
-		QCoreApplication::quit();
-		return; // quit cannot stop it sometimes...
+		jobDoneQuit();
 	}
 
 	qDebug() << "start downloading update";
@@ -130,7 +144,7 @@ void UpdateProcessor::fileReady(QString const filePath)
 	qDebug() << "Saving file for later usage";
 	mParser->changeUnit(mParams.value("-unit"));
 	mUpdateInfo->saveFileForLater(mParser, filePath);
-	QCoreApplication::quit();
+	jobDoneQuit();
 }
 
 void UpdateProcessor::updateFinished(bool hasSuccess)
@@ -147,6 +161,9 @@ void UpdateProcessor::updateFinished(bool hasSuccess)
 	} else {
 		qDebug() << "setup has installed INCORRECT";
 	}
+
+	qDebug() << "Restarting main application and quit";
+	restartMainApplication();
 }
 
 void UpdateProcessor::downloadErrors(QString error)
@@ -154,9 +171,14 @@ void UpdateProcessor::downloadErrors(QString error)
 	if (mCurAttempt < maxAttemptsCount) {
 		mRetryTimer.start(retryTimerout);
 	} else {
-		QCoreApplication::quit();
+		jobDoneQuit();
 	}
 
 	Q_UNUSED(error);
+}
+
+void UpdateProcessor::jobDoneQuit()
+{
+	QCoreApplication::quit();
 }
 

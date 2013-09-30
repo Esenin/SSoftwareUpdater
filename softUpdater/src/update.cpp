@@ -59,7 +59,7 @@ void Update::installUpdate()
 
 bool Update::isEmpty() const
 {
-	return mFilePath.isEmpty();
+	return mFilePath.isEmpty() || !QFile::exists(mFilePath);
 }
 
 bool Update::isInstalling() const

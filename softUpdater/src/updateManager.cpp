@@ -12,6 +12,10 @@ UpdateManager::UpdateManager(QString updatesFolder, QObject *parent)
 UpdateManager::~UpdateManager()
 {
 	mUpdateInfo->sync();
+	if (QDir(mUpdatesFolder).exists() && QFile::exists(settingsFile) && QFile(settingsFile).size() == 0) {
+		QFile::remove(settingsFile);
+		QDir(mUpdatesFolder).removeRecursively();
+	}
 }
 
 void UpdateManager::saveInfoFromParser(DetailsParser const *parser)
@@ -42,14 +46,14 @@ void UpdateManager::removePreparedUpdate()
 	mPreparedUpdate->clear();
 }
 
-bool UpdateManager::hasPreparedUpdates()
+bool UpdateManager::hasPreparedUpdatesInfo()
 {
 	return QDir(mUpdatesFolder).exists() && QFile::exists(settingsFile);
 }
 
 void UpdateManager::loadUpdateInfo(QString const unit)
 {
-	if (!hasPreparedUpdates()) {
+	if (!hasPreparedUpdatesInfo()) {
 		return;
 	}
 

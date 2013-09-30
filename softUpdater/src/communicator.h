@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QtCore/QObject>
-#include <iostream>
+#include <stdio.h>
 
 class Communicator : public QObject
 {
@@ -9,7 +9,13 @@ class Communicator : public QObject
 public:
 	explicit Communicator(QObject *parent = 0);
 
-	static void writeQuitMessage();
-	static void writeHelpMessage();
+	void readProgramPath();
+	void writeQuitMessage();
+	void writeResumeMessage();
+	void writeHelpMessage();
+
+	QString parentAppPath() const;
+protected:
+	QString mParentAppPath;
 };
 
