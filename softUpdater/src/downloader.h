@@ -5,6 +5,9 @@
 #include <QtCore/QFileInfo>
 #include <QDebug>
 
+//!
+//! @brief The Downloader class
+//! provides two-way of downloading: to IODevice and to file
 class Downloader : public QObject
 {
 	Q_OBJECT
@@ -12,7 +15,9 @@ public:
 	class CreateFileException{};
 
 	explicit Downloader(QObject *parent = 0);
+	//! downloads lightweight data and emits signal with IODevice
 	void getUpdateDetails(QUrl const url);
+	//! downloads to file, emits filepath
 	void getUpdate(QUrl const url) throw(CreateFileException);
 
 signals:

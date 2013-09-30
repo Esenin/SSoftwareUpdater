@@ -8,7 +8,7 @@ UpdateProcessor::UpdateProcessor()
 	mCommunicator = new Communicator(this);
 	mDownloader = new Downloader(this);
 	mParser = new XmlDataParser();
-	mUpdateInfo = new UpdateManager(mUpdatesFolder, this);
+	mUpdateInfo = new UpdateStorage(mUpdatesFolder, this);
 	if (!parseParams()) {
 		mCommunicator->writeHelpMessage();
 	}
@@ -30,11 +30,11 @@ void UpdateProcessor::startUpdateControl()
 
 	if (!mUpdateInfo->preparedUpdate()->isInstalling()) {
 		mCommunicator->writeResumeMessage();
-		startUpdatingProcess();
+		startDownloadingProcess();
 	}
 }
 
-void UpdateProcessor::startUpdatingProcess()
+void UpdateProcessor::startDownloadingProcess()
 {
 	qDebug() << "Getting new update!";
 	if (mRetryTimer.isActive()) {
@@ -46,7 +46,7 @@ void UpdateProcessor::startUpdatingProcess()
 
 void UpdateProcessor::initConnections()
 {
-	connect(&mRetryTimer, SIGNAL(timeout()), this, SLOT(startUpdatingProcess()));
+	connect(&mRetryTimer, SIGNAL(timeout()), this, SLOT(startDownloadingProcess()));
 	connect(mDownloader, SIGNAL(detailsLoadError(QString)), this, SLOT(downloadErrors(QString)));
 	connect(mDownloader, SIGNAL(updatesLoadError(QString)), this, SLOT(downloadErrors(QString)));
 	connect(mDownloader, SIGNAL(updatesDownloaded(QString)), this, SLOT(fileReady(QString)));

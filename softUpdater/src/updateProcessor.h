@@ -10,35 +10,44 @@
 
 #include "downloader.h"
 #include "xmlDataParser.h"
-#include "updateManager.h"
+#include "updateStorage.h"
 #include "communicator.h"
 
+//!
+//! @brief The UpdateProcessor class
+//! Logic of update process, makes updates
+//! and interaction with main application
 class UpdateProcessor : public QObject
 {
 	Q_OBJECT
 public:
+	//! parsing application params
 	UpdateProcessor();
 	~UpdateProcessor();
 
+	//! starts all updating process
 	void startUpdateControl();
 
 public slots:
-	void startUpdatingProcess();
+	void startDownloadingProcess();
 
 protected:
 	void initConnections();
-	//! \brief parseParams
-	//! \return True if arguments are correct, false otherwise
+
+	//! @return True if arguments are correct, false otherwise
 	bool parseParams();
-	//! \brief hasNewUpdates
-	//! \param newVersion
-	//! \return True if new version is newer than current
+
+	//! @param newVersion
+	//! @return True if new version is newer than current
 	bool hasNewUpdates(QString const newVersion);
+	//! update install
 	void startSetupProcess(Update *update);
+	//! loads prepared update and installs it
 	void checkoutPreparedUpdates();
+	//! restart main application after install finished
 	void restartMainApplication();
 
-	static int const retryTimerout = 1 * 15 * 1000; //                 ! ////////////////
+	static int const retryTimerout = 5 * 60 * 1000;
 	static int const maxAttemptsCount = 3;
 	int mCurAttempt;
 	bool mHardUpdate;
@@ -48,7 +57,7 @@ protected:
 	Communicator *mCommunicator;
 	Downloader *mDownloader;
 	DetailsParser *mParser;
-	UpdateManager *mUpdateInfo;
+	UpdateStorage *mUpdateInfo;
 
 protected slots:
 	void detailsChanged();

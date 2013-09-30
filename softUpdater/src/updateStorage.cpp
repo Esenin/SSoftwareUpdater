@@ -1,6 +1,6 @@
-#include "updateManager.h"
+#include "updateStorage.h"
 
-UpdateManager::UpdateManager(QString updatesFolder, QObject *parent)
+UpdateStorage::UpdateStorage(QString updatesFolder, QObject *parent)
 	: QObject(parent)
 	, mUpdatesFolder(updatesFolder)
 	, settingsFile(updatesFolder + "updateInfo.ini")
@@ -9,7 +9,7 @@ UpdateManager::UpdateManager(QString updatesFolder, QObject *parent)
 	mUpdateInfo = new QSettings(settingsFile, QSettings::IniFormat, parent);
 }
 
-UpdateManager::~UpdateManager()
+UpdateStorage::~UpdateStorage()
 {
 	mUpdateInfo->sync();
 	if (QDir(mUpdatesFolder).exists() && QFile::exists(settingsFile) && QFile(settingsFile).size() == 0) {
@@ -18,7 +18,7 @@ UpdateManager::~UpdateManager()
 	}
 }
 
-void UpdateManager::saveInfoFromParser(DetailsParser const *parser)
+void UpdateStorage::saveInfoFromParser(DetailsParser const *parser)
 {
 	mUpdateInfo->beginGroup(parser->currentUnit());
 	mUpdateInfo->setValue("fileName", parser->currentUpdate()->filePath());
@@ -27,7 +27,7 @@ void UpdateManager::saveInfoFromParser(DetailsParser const *parser)
 	mUpdateInfo->endGroup();
 }
 
-void UpdateManager::saveFileForLater(DetailsParser const *parser, QString const filePath)
+void UpdateStorage::saveFileForLater(DetailsParser const *parser, QString const filePath)
 {
 	QDir().mkdir(mUpdatesFolder);
 
@@ -40,18 +40,18 @@ void UpdateManager::saveFileForLater(DetailsParser const *parser, QString const 
 	saveInfoFromParser(parser);
 }
 
-void UpdateManager::removePreparedUpdate()
+void UpdateStorage::removePreparedUpdate()
 {
 	mUpdateInfo->remove(mPreparedUpdate->unit());
 	mPreparedUpdate->clear();
 }
 
-bool UpdateManager::hasPreparedUpdatesInfo()
+bool UpdateStorage::hasPreparedUpdatesInfo()
 {
 	return QDir(mUpdatesFolder).exists() && QFile::exists(settingsFile);
 }
 
-void UpdateManager::loadUpdateInfo(QString const unit)
+void UpdateStorage::loadUpdateInfo(QString const unit)
 {
 	if (!hasPreparedUpdatesInfo()) {
 		return;
@@ -67,7 +67,7 @@ void UpdateManager::loadUpdateInfo(QString const unit)
 	mUpdateInfo->endGroup();
 }
 
-Update *UpdateManager::preparedUpdate()
+Update *UpdateStorage::preparedUpdate()
 {
 	return mPreparedUpdate;
 }

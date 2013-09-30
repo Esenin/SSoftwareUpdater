@@ -5,6 +5,9 @@
 #include <QtCore/QFileInfo>
 #include <QtCore/QStringList>
 
+//!
+//! @brief The Update class
+//! Stores one-unit update informatiom and provides installing
 class Update : public QObject
 {
 	Q_OBJECT
@@ -15,10 +18,13 @@ public:
 	void setUrl(QUrl const link);
 	void setUnitName(QString const unit);
 	void setData(QString const filePath, QStringList const args, QString const version, QUrl const link = QUrl());
+	//! removes update-file and clears all information
 	void clear();
 
+	//! starts setup process, emits signal when finished
 	void installUpdate();
 
+	//! @return True case there is no file for install
 	bool isEmpty() const;
 	bool isInstalling() const;
 	bool isInstalled() const;

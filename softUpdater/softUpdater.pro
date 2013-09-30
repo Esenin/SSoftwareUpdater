@@ -19,16 +19,16 @@ SOURCES += src/main.cpp\
     src/xmlDataParser.cpp \
     src/downloader.cpp \
     src/communicator.cpp \
-    src/updateManager.cpp \
     src/update.cpp \
-    src/updateProcessor.cpp
+    src/updateProcessor.cpp \
+    src/updateStorage.cpp
 
 HEADERS  += \
     src/detailsParser.h \
     src/xmlDataParser.h \
     src/downloader.h \
     src/communicator.h \
-    src/updateManager.h \
     src/update.h \
-    src/updateProcessor.h
+    src/updateProcessor.h \
+    src/updateStorage.h
 

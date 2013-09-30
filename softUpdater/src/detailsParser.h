@@ -8,7 +8,7 @@
 #include "update.h"
 
 //!
-//! \brief The DetailsParser class
+//! @brief The DetailsParser class
 //! reads received file and provides fast access to main params
 class DetailsParser : public QObject
 {
@@ -17,14 +17,17 @@ public:
 	DetailsParser();
 	virtual ~DetailsParser(){}
 
-	//! \brief setUnitName  checkout other module
-	//! \param currentUnit other module name
+	//! switch to other result of parsing
+	//! @param unit other module name
 	virtual void changeUnit(QString const unit);
 
+	//! @return true in case input is invalid
 	virtual bool hasErrors() const = 0;
 
+	//! @return Update - result of parsing
 	Update* currentUpdate() const;
 
+	//! @return all units saved in options-file
 	QStringList units() const;
 	QString currentUnit() const;
 
@@ -32,6 +35,7 @@ signals:
 	void parseFinished();
 
 public slots:
+	//! starts parsing
 	virtual void parseDevice(QIODevice *device) = 0;
 
 protected:
