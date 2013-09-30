@@ -24,3 +24,14 @@ updater -unit [unit-name] -version [version] -url [url-to-file] [| -hard]
 	updater -unit myCoolUnitName -version 2.8a -url http://127.0.0.1/updates.xml -hard
 
 ### [XML file example (updates on server side) (Click here!)] (https://github.com/Esenin/SSoftwareUpdater/blob/master/updates.xml)
+
+###client usage
+
+Execute updater with right params. Hook stdIO, then:
+print filepath of your main application to Updater™  and wait for incomming stringline
+It's recommended to terminate your application if you get "Terminate!" string, otherwise you should continue if it is "Resume!"
+
+After installing patch Updater will restart your application
+
+
+EOF
