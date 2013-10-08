@@ -20,11 +20,11 @@ void XmlDataParser::parseDevice(QIODevice *device)
 	mXml = new QXmlStreamReader(device);
 	try {
 		readXml();
+		changeUnit(mFileUrls.keys().first());
 	} catch(ReadError &) {
 		mHasInvalidFile = true;
 	}
 
-	changeUnit(mFileUrls.keys().first());
 	device->deleteLater();
 	emit parseFinished();
 }
