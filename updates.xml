@@ -2,9 +2,15 @@
     <unitFileList>
         <unitFile>
             <unit>windows</unit>
-            <url>http://127.0.0.1/Sea_battle0.3_Setup.exe</url>     
-            <paramStr>/s</paramStr>
-            <version>0.3.2</version>
+            <url>http://localhost/QReal-14.1-windows-installer.exe</url>
+            <paramStr>--prefix %qru:installdir% --unattendedmodeui minimal --mode unattended</paramStr>
+            <version>2.2.2</version>
+        </unitFile>
+        <unitFile>
+            <unit>windows-qru:self</unit> <-- new updater version self installator -->
+            <url>http://localhost/QReal-14.2U-windows-installer.exe</url>
+            <paramStr>--prefix %qru:installdir% --unattendedmodeui minimal --mode unattended</paramStr>
+            <version>2.2.2</version>
         </unitFile>
         <unitFile>
             <unit>linux</unit>

@@ -1,5 +1,11 @@
 #include "update.h"
 
+namespace markers {
+static QString const selfInstalling = "qru::self";
+}
+
+using namespace qrUpdater;
+
 Update::Update(QObject *parent)
 	: QObject(parent)
 	, mIsInstalled(false)
@@ -23,6 +29,11 @@ void Update::setUrl(const QUrl link)
 void Update::setUnitName(const QString unit)
 {
 	mModule = unit;
+}
+
+void Update::setFilePath(const QString path)
+{
+	mFilePath = path;
 }
 
 void Update::setData(const QString filePath, const QStringList args, const QString version, const QUrl link)
@@ -72,6 +83,11 @@ bool Update::isInstalled() const
 	return mIsInstalled;
 }
 
+bool Update::hasSelfInstallMarker() const
+{
+	return unit() == markers::selfInstalling;
+}
+
 QUrl Update::url() const
 {
 	return mDownloadUrl;
@@ -97,7 +113,7 @@ QString Update::version() const
 	return mVersion;
 }
 
-QStringList Update::arguments() const
+QStringList& Update::arguments()
 {
 	return mArguments;
 }

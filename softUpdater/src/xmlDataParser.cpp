@@ -1,5 +1,7 @@
 #include "xmlDataParser.h"
 
+using namespace qrUpdater;
+
 XmlDataParser::XmlDataParser()
 	: DetailsParser()
 	, mXml(NULL)
@@ -20,13 +22,11 @@ void XmlDataParser::parseDevice(QIODevice *device)
 	mXml = new QXmlStreamReader(device);
 	try {
 		readXml();
-		changeUnit(mFileUrls.keys().first());
 	} catch(ReadError &) {
 		mHasInvalidFile = true;
 	}
 
 	device->deleteLater();
-	emit parseFinished();
 }
 
 bool XmlDataParser::hasErrors() const

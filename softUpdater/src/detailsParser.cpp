@@ -1,27 +1,29 @@
 #include "detailsParser.h"
 
+using namespace qrUpdater;
+
 DetailsParser::DetailsParser()
 {
-	mCurrentUpdate = new Update(this);
 }
 
-void DetailsParser::changeUnit(QString const unit)
+Update *DetailsParser::update(QString const unit)
 {
-	if (mCurrentUpdate->unit() == unit) {
-		return;
+	for (int i = 0; i < mUpdates.size(); i++) {
+		if (mUpdates.at(i)->unit() == unit) {
+			return mUpdates.at(i);
+		}
 	}
-	mCurrentUpdate->setUnitName(unit);
-	mCurrentUpdate->setData(
-			QFileInfo(mFileUrls.value(unit).toString()).fileName()
-			, mParamStrings.value(unit).split(" ")
-			, mVersions.value(unit)
-			, mFileUrls.value(unit)
-	);
+	return NULL;
 }
 
-Update *DetailsParser::currentUpdate() const
+Update *DetailsParser::update(QUrl const url)
 {
-	return mCurrentUpdate;
+	for (int i = 0; i < mUpdates.size(); i++) {
+		if (mUpdates.at(i)->url() == url) {
+			return mUpdates.at(i);
+		}
+	}
+	return NULL;
 }
 
 QStringList DetailsParser::units() const
@@ -29,8 +31,28 @@ QStringList DetailsParser::units() const
 	return mFileUrls.keys();
 }
 
-QString DetailsParser::currentUnit() const
+QList<Update *> DetailsParser::updatesParsed() const
 {
-	return mCurrentUpdate->unit();
+	return mUpdates;
+}
+
+void DetailsParser::processDevice(QIODevice *device)
+{
+	parseDevice(device);
+
+	foreach (QString const unit, units()) {
+		Update *newUpdate = new Update(this);
+		newUpdate->setUnitName(unit);
+		newUpdate->setData(
+				QFileInfo(mFileUrls.value(unit).toString()).fileName()
+				, mParamStrings.value(unit).split(" ", QString::SkipEmptyParts)
+				, mVersions.value(unit)
+				, mFileUrls.value(unit)
+		);
+
+		mUpdates << newUpdate;
+	}
+
+	emit parseFinished();
 }
 

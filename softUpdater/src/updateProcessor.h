@@ -1,18 +1,18 @@
 #pragma once
 
-#include <QtCore/QCoreApplication>
 #include <QtCore/QStringList>
 #include <QtCore/QSettings>
 #include <QtCore/QFileInfo>
-#include <QtCore/QProcess>
 #include <QtCore/QTimer>
-#include <QDebug>
 
+#include "argsParser.h"
 #include "downloader.h"
 #include "xmlDataParser.h"
 #include "updateStorage.h"
+#include "updatesInstaller.h"
 #include "communicator.h"
 
+namespace qrUpdater {
 //!
 //! @brief The UpdateProcessor class
 //! Logic of update process, makes updates
@@ -33,15 +33,9 @@ public slots:
 
 protected:
 	void initConnections();
-
-	//! @return True if arguments are correct, false otherwise
-	bool parseParams();
-
 	//! @param newVersion
 	//! @return True if new version is newer than current
 	bool hasNewUpdates(QString const newVersion);
-	//! update install
-	void startSetupProcess(Update *update);
 	//! loads prepared update and installs it
 	void checkoutPreparedUpdates();
 	//! restart main application after install finished
@@ -53,7 +47,8 @@ protected:
 	bool mHardUpdate;
 	QString mUpdatesFolder;
 	QTimer mRetryTimer;
-	QMap<QString, QString> mParams;
+	ArgsParser mArgsParser;
+	UpdatesInstaller mUpdatesInstaller;
 	Communicator *mCommunicator;
 	Downloader *mDownloader;
 	DetailsParser *mParser;
@@ -61,9 +56,12 @@ protected:
 
 protected slots:
 	void detailsChanged();
-	void fileReady(QString const filePath);
-	void updateFinished(bool hasSuccess);
+	void fileReady(QUrl url, QString const filePath);
+	void downloadingFinished();
+	void installingFinished(bool hasSuccess);
 	void downloadErrors(QString error = QString());
 	void jobDoneQuit();
 };
+
+}
 

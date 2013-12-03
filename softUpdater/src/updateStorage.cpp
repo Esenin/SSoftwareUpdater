@@ -1,16 +1,28 @@
 #include "updateStorage.h"
 
+namespace keys {
+static QString const filePath = "fileName";
+static QString const version = "version";
+static QString const arguments = "args";
+}
+
+using namespace qrUpdater;
+
 UpdateStorage::UpdateStorage(QString updatesFolder, QObject *parent)
 	: QObject(parent)
 	, mUpdatesFolder(updatesFolder)
 	, settingsFile(updatesFolder + "updateInfo.ini")
 {
-	mPreparedUpdate = new Update(this);
 	mUpdateInfo = new QSettings(settingsFile, QSettings::IniFormat, parent);
 }
 
 UpdateStorage::~UpdateStorage()
 {
+	foreach (Update *update, mPreparedUpdates) {
+		if (update->isEmpty()) {
+			mUpdateInfo->remove(update->unit());
+		}
+	}
 	mUpdateInfo->sync();
 	if (QDir(mUpdatesFolder).exists() && QFile::exists(settingsFile) && QFile(settingsFile).size() == 0) {
 		QFile::remove(settingsFile);
@@ -18,16 +30,16 @@ UpdateStorage::~UpdateStorage()
 	}
 }
 
-void UpdateStorage::saveInfoFromParser(DetailsParser const *parser)
+void UpdateStorage::saveUpdateInfo(Update *update)
 {
-	mUpdateInfo->beginGroup(parser->currentUnit());
-	mUpdateInfo->setValue("fileName", parser->currentUpdate()->filePath());
-	mUpdateInfo->setValue("version", parser->currentUpdate()->version());
-	mUpdateInfo->setValue("args", parser->currentUpdate()->arguments());
+	mUpdateInfo->beginGroup(update->unit());
+	mUpdateInfo->setValue(keys::filePath, update->filePath());
+	mUpdateInfo->setValue(keys::version, update->version());
+	mUpdateInfo->setValue(keys::arguments, update->arguments());
 	mUpdateInfo->endGroup();
 }
 
-void UpdateStorage::saveFileForLater(DetailsParser const *parser, QString const filePath)
+void UpdateStorage::saveFileForLater(Update *concreteUpdate, QString const filePath)
 {
 	QDir().mkdir(mUpdatesFolder);
 
@@ -35,15 +47,20 @@ void UpdateStorage::saveFileForLater(DetailsParser const *parser, QString const 
 		QFile::remove(mUpdatesFolder + QFileInfo(filePath).fileName());
 	}
 
-	QFile::rename(filePath, mUpdatesFolder + QFileInfo(filePath).fileName());
+	QString const endFilePath = mUpdatesFolder + QFileInfo(filePath).fileName();
 
-	saveInfoFromParser(parser);
+	QFile::rename(filePath, endFilePath);
+
+	concreteUpdate->setFilePath(endFilePath);
+	mPreparedUpdates << concreteUpdate;
+	saveUpdateInfo(concreteUpdate);
 }
 
-void UpdateStorage::removePreparedUpdate()
+void UpdateStorage::removeUpdate(Update *update)
 {
-	mUpdateInfo->remove(mPreparedUpdate->unit());
-	mPreparedUpdate->clear();
+	mUpdateInfo->remove(update->unit());
+	update->clear();
+	mPreparedUpdates.removeOne(update);
 }
 
 bool UpdateStorage::hasPreparedUpdatesInfo()
@@ -51,24 +68,34 @@ bool UpdateStorage::hasPreparedUpdatesInfo()
 	return QDir(mUpdatesFolder).exists() && QFile::exists(settingsFile);
 }
 
-void UpdateStorage::loadUpdateInfo(QString const unit)
+void UpdateStorage::loadUpdatesInfo(QStringList const units)
 {
 	if (!hasPreparedUpdatesInfo()) {
 		return;
 	}
 
-	mUpdateInfo->beginGroup(unit);
-	mPreparedUpdate->setData(
-			mUpdatesFolder + mUpdateInfo->value("fileName").toString()
-			, mUpdateInfo->value("args").toStringList()
-			, mUpdateInfo->value("version").toString()
-	);
-	mPreparedUpdate->setUnitName(unit);
-	mUpdateInfo->endGroup();
+	foreach (QString const unit, units) {
+		Update *newUpdate = new Update(this);
+
+		mUpdateInfo->beginGroup(unit);
+		newUpdate->setData(
+				mUpdateInfo->value(keys::filePath).toString()
+				, mUpdateInfo->value(keys::arguments).toStringList()
+				, mUpdateInfo->value(keys::version).toString()
+		);
+		newUpdate->setUnitName(unit);
+		mUpdateInfo->endGroup();
+
+		if (!newUpdate->isEmpty()) {
+			mPreparedUpdates << newUpdate;
+		} else {
+			delete newUpdate;
+		}
+	}
 }
 
-Update *UpdateStorage::preparedUpdate()
+QList<Update *> UpdateStorage::preparedUpdates() const
 {
-	return mPreparedUpdate;
+	return mPreparedUpdates;
 }
 

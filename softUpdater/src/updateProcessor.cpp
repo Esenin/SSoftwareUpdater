@@ -1,5 +1,7 @@
 #include "updateProcessor.h"
 
+using namespace qrUpdater;
+
 UpdateProcessor::UpdateProcessor()
 	: mCurAttempt(0)
 	, mHardUpdate(false)
@@ -9,7 +11,9 @@ UpdateProcessor::UpdateProcessor()
 	mDownloader = new Downloader(this);
 	mParser = new XmlDataParser();
 	mUpdateInfo = new UpdateStorage(mUpdatesFolder, this);
-	if (!parseParams()) {
+	try {
+		mArgsParser.parse();
+	} catch(ArgsParser::BadArguments const &) {
 		mCommunicator->writeHelpMessage();
 	}
 
@@ -25,10 +29,9 @@ void UpdateProcessor::startUpdateControl()
 {
 	mCommunicator->readProgramPath();
 
-	qDebug() << "checking prepared updates";
 	checkoutPreparedUpdates();
 
-	if (!mUpdateInfo->preparedUpdate()->isInstalling()) {
+	if (mUpdatesInstaller.isEmpty()) {
 		mCommunicator->writeResumeMessage();
 		startDownloadingProcess();
 	}
@@ -36,74 +39,49 @@ void UpdateProcessor::startUpdateControl()
 
 void UpdateProcessor::startDownloadingProcess()
 {
-	qDebug() << "Getting new update!";
 	if (mRetryTimer.isActive()) {
 		mRetryTimer.stop();
 	}
 	mCurAttempt++;
-	mDownloader->getUpdateDetails(mParams.value("-url"));
+	mDownloader->getUpdateDetails(mArgsParser.detailsUrl());
 }
 
 void UpdateProcessor::initConnections()
 {
 	connect(&mRetryTimer, SIGNAL(timeout()), this, SLOT(startDownloadingProcess()));
+	connect(&mUpdatesInstaller, SIGNAL(installsFinished(bool)), this, SLOT(installingFinished(bool)));
+	connect(&mUpdatesInstaller, SIGNAL(selfInstalling()), this, SLOT(jobDoneQuit()));
 	connect(mDownloader, SIGNAL(detailsLoadError(QString)), this, SLOT(downloadErrors(QString)));
 	connect(mDownloader, SIGNAL(updatesLoadError(QString)), this, SLOT(downloadErrors(QString)));
-	connect(mDownloader, SIGNAL(updatesDownloaded(QString)), this, SLOT(fileReady(QString)));
-	connect(mDownloader, SIGNAL(detailsDownloaded(QIODevice*)), mParser, SLOT(parseDevice(QIODevice*)));
+	connect(mDownloader, SIGNAL(updateDownloaded(QUrl,QString)), this, SLOT(fileReady(QUrl,QString)));
+	connect(mDownloader, SIGNAL(downloadingFinished()), this, SLOT(downloadingFinished()));
+	connect(mDownloader, SIGNAL(detailsDownloaded(QIODevice*)), mParser, SLOT(processDevice(QIODevice*)));
 	connect(mParser, SIGNAL(parseFinished()), this, SLOT(detailsChanged()));
-}
-
-bool UpdateProcessor::parseParams()
-{
-	int const criticalParamsCount = 3;
-	int const argsCount = QCoreApplication::arguments().size();
-	if (argsCount - 1 < criticalParamsCount * 2) {
-		return false;
-	}
-
-	mHardUpdate = QCoreApplication::arguments().contains("-hard", Qt::CaseInsensitive);
-	QStringList params;
-	params << "-unit" << "-version" << "-url";
-	foreach (QString param, params) {
-		int index = QCoreApplication::arguments().indexOf(param);
-		if (index == -1 || index + 1 >= argsCount)
-			return false;
-
-		mParams.insert(param, QCoreApplication::arguments().at(index + 1));
-	}
-
-	return true;
 }
 
 bool UpdateProcessor::hasNewUpdates(QString const newVersion)
 {
-	return newVersion > mParams.value("-version");
-}
-
-void UpdateProcessor::startSetupProcess(Update *update)
-{
-	mCommunicator->writeQuitMessage();
-	qDebug() << "start setup: " << update->filePath();
-	connect(update, SIGNAL(installFinished(bool)), this, SLOT(updateFinished(bool)));
-	update->installUpdate();
+	return newVersion > mArgsParser.version();
 }
 
 void UpdateProcessor::checkoutPreparedUpdates()
 {
 	if (!mUpdateInfo->hasPreparedUpdatesInfo()) {
-		qDebug() << "no prepared updates there";
 		return;
 	}
 
-	mUpdateInfo->loadUpdateInfo(mParams.value("-unit"));
-	if (!hasNewUpdates(mUpdateInfo->preparedUpdate()->version()) || mUpdateInfo->preparedUpdate()->isEmpty()) {
-		qDebug() << "update is outdated";
-		return;
+	mUpdateInfo->loadUpdatesInfo(mArgsParser.units());
+	foreach (Update *update, mUpdateInfo->preparedUpdates()) {
+		if (hasNewUpdates(update->version())) {
+			mUpdatesInstaller << update;
+		}
 	}
 
-	qDebug() << "starting setup process";
-	startSetupProcess(mUpdateInfo->preparedUpdate());
+	if (mUpdatesInstaller.isEmpty()) {
+		return;
+	}
+	mCommunicator->writeQuitMessage();
+	mUpdatesInstaller.installAll();
 }
 
 void UpdateProcessor::restartMainApplication()
@@ -123,47 +101,40 @@ void UpdateProcessor::detailsChanged()
 		return;
 	}
 
-	mParser->changeUnit(mParams.value("-unit"));
-	if (!hasNewUpdates(mParser->currentUpdate()->version())) {
-		qDebug() << "Server has no new updates";
+	QList<QUrl> filesUrl;
+	foreach (Update *update, mParser->updatesParsed()) {
+		if (mArgsParser.units().contains(update->unit()) && hasNewUpdates(update->version())) {
+			filesUrl << update->url();
+		}
+	}
+
+	if (!filesUrl.isEmpty()) {
+		mDownloader->getUpdateFiles(filesUrl);
+	} else {
 		jobDoneQuit();
 	}
-
-	qDebug() << "start downloading update";
-	mDownloader->getUpdate(mParser->currentUpdate()->url());
 }
 
-void UpdateProcessor::fileReady(QString const filePath)
+void UpdateProcessor::fileReady(QUrl url, QString const filePath)
+{
+	mUpdateInfo->saveFileForLater(mParser->update(url), filePath);
+}
+
+void UpdateProcessor::downloadingFinished()
 {
 	if (mHardUpdate) {
-		qDebug() << "stating hard update process";
-		startSetupProcess(mParser->currentUpdate());
-		return;
+		mUpdatesInstaller << mParser->updatesParsed();
+		mUpdatesInstaller.installAll();
+	} else {
+		jobDoneQuit();
 	}
-
-	qDebug() << "Saving file for later usage";
-	mParser->changeUnit(mParams.value("-unit"));
-	mUpdateInfo->saveFileForLater(mParser, filePath);
-	jobDoneQuit();
 }
 
-void UpdateProcessor::updateFinished(bool hasSuccess)
+void UpdateProcessor::installingFinished(bool hasSuccess)
 {
-	qDebug() << "setup execution finished. Success:" << hasSuccess;
-	if (hasSuccess) {
-		if (mUpdateInfo->preparedUpdate()->isInstalled()) {
-			mParams.insert("-version", mUpdateInfo->preparedUpdate()->version());
-			mUpdateInfo->removePreparedUpdate();
-		} else {
-			mParams.insert("-version", mParser->currentUpdate()->version());
-			mParser->currentUpdate()->clear();
-		}
-	} else {
-		qDebug() << "setup has installed INCORRECT";
-	}
-
-	qDebug() << "Restarting main application and quit";
 	restartMainApplication();
+	jobDoneQuit();
+	Q_UNUSED(hasSuccess);
 }
 
 void UpdateProcessor::downloadErrors(QString error)

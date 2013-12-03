@@ -5,6 +5,7 @@
 #include <QtCore/QFileInfo>
 #include <QtCore/QStringList>
 
+namespace qrUpdater {
 //!
 //! @brief The Update class
 //! Stores one-unit update informatiom and provides installing
@@ -17,6 +18,7 @@ public:
 
 	void setUrl(QUrl const link);
 	void setUnitName(QString const unit);
+	void setFilePath(QString const path);
 	void setData(QString const filePath, QStringList const args, QString const version, QUrl const link = QUrl());
 	//! removes update-file and clears all information
 	void clear();
@@ -28,12 +30,13 @@ public:
 	bool isEmpty() const;
 	bool isInstalling() const;
 	bool isInstalled() const;
+	bool hasSelfInstallMarker() const;
 	QUrl url() const;
 	QString unit() const;
 	QString filePath() const;
 	QString fileName() const;
 	QString version() const;
-	QStringList arguments() const;
+	QStringList& arguments();
 
 signals:
 	//! @return True if process finished correctly
@@ -52,3 +55,4 @@ protected slots:
 	void installingFinished(int exitCode, QProcess::ExitStatus status);
 };
 
+}
